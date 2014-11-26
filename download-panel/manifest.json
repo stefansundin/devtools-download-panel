@@ -1,0 +1,16 @@
+{
+  "name": "Download panel",
+  "version": "0.0.1",
+  "description": "Adds a download panel to Developer Tools.",
+  "background": {
+      "scripts": [ "background.js" ]
+  },
+  "devtools_page": "devtools.html",
+  "permissions": [
+    "tabs",
+    "downloads",
+    "clipboardRead"
+  ],
+  "minimum_chrome_version": "18",
+  "manifest_version": 2
+}
