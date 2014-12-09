@@ -13,6 +13,15 @@
   |
   <a href="panel.html" target="_blank">open panel.html</a> (for debugging)
 
+  <div class="network">
+    <h3 id="network_header">Network</h3>
+    <p>Network request capture regex:</p>
+    <p><input type="search" id="network_regex" placeholder=".mp4$" disabled></p>
+    <p><label><input type="checkbox" id="network_minsize_checkbox">Minimum size:</label> <input type="search" id="network_minsize" placeholder="1m (k, m and g are supported suffixes)" title="k, m and g are supported suffixes" value="1m"></p>
+    <button id="network_clear">Clear</button>
+    <ul id="network"></ul>
+  </div>
+
   <h3 id="history_header">History</h3>
   <ul id="history"></ul>
 </body>
