@@ -5,11 +5,15 @@
   <link rel="stylesheet" type="text/css" href="panel.css">
 </head>
 <body>
-  <p><input type="text" id="url" placeholder="http://"></p>
-  <p><input type="text" id="filename" placeholder="video.flv"></p>
-  <button>Download</button>
-  <label><input type="checkbox" id="saveas"> Save As</label>
-  <p><a href="panel.html" target="_blank">open panel.html</a> (for debugging)</p>
-  <p id="version"></p>
+  <p><input type="search" id="url" placeholder="http://"></p>
+  <p><input type="search" id="filename" placeholder="video.flv"></p>
+  <button id="download">Download</button>
+  <button id="saveas">Save As</button>
+  <span id="version"></span>
+  |
+  <a href="panel.html" target="_blank">open panel.html</a> (for debugging)
+
+  <h3 id="history_header">History</h3>
+  <ul id="history"></ul>
 </body>
 </html>

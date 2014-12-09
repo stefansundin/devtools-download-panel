@@ -3,14 +3,6 @@
 
 chrome.runtime.onMessage.addListener(
   function(message, sender, sendResponse) {
-    var opts = {
-      url: message.url,
-      saveAs: message.saveAs
-    };
-    if (message.filename) {
-      opts.filename = message.filename;
-    }
-    // console.log(opts);
-    chrome.downloads.download(opts);
+    chrome.downloads.download(message.opts);
   }
 );

@@ -1,6 +1,19 @@
-input[type=text] {
+input[type=search] {
   width: 90%;
 }
 p {
   margin: .4em 0;
+}
+h3 {
+  margin: 10px 0 0 0;
+  display: none;
+}
+ul {
+  margin: 0;
+  padding: 0 17px;
+}
+a {
+  color: blue;
+  cursor: pointer;
+  text-decoration: none;
 }
