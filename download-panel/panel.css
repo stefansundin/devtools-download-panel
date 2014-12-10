@@ -14,6 +14,9 @@ ul {
   margin: 0;
   padding: 0 17px;
 }
+li {
+  white-space: nowrap;
+}
 a {
   color: blue;
   cursor: pointer;
