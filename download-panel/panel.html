@@ -15,10 +15,23 @@
 
   <div class="network">
     <h3 id="network_header">Network</h3>
-    <p>Network request capture regex:</p>
-    <p><input type="search" id="network_regex" placeholder=".mp4$" disabled></p>
+    <p>Note: Due to limitations in the devtools API, requests only show up here after they are completed/canceled.</p>
+
+    <p>Network request capture regex (matches whole url):</p>
+    <p><input type="search" id="network_regex" list="regex_examples" placeholder="\.mp4$"></p>
+    <datalist id="regex_examples">
+      <option value="\.(z(ip|[0-9]{2})|r(ar|[0-9]{2})|jar|bz2|gz|tar|rpm|7z(ip)?|lzma|xz)($|\?)">Archive files</option>
+      <option value="\.(exe|msi|dmg|bin|xpi|iso)($|\?)">Binary files</option>
+      <option value="\.(css|js|html|json)($|\?)">Web files</option>
+      <option value="\.(jp(e?g|e|2)|gif|png|tiff?|bmp|ico)($|\?)">Image files</option>
+      <option value="\.(mpeg|ra?m|avi|mp(g|e|4)|mov|divx|asf|qt|wmv|m\dv|rv|vob|asx|ogm|ogv|webm)($|\?)">Video files</option>
+      <option value="\.(mp3|wav|og(g|a)|flac|midi?|rm|aac|wma|mka|ape)($|\?)">Audio files</option>
+      <option value="\.(pdf|xlsx?|docx?|odf|odt|rtf)($|\?)">Document files</option>
+    </datalist>
+
     <p><label><input type="checkbox" id="network_minsize_checkbox"> Minimum size:</label> <input type="search" id="network_minsize" title="k, m and g are supported suffixes" value="1m"></p>
     <button id="network_clear">Clear</button>
+
     <p id="network_stats"></p>
     <ul id="network"></ul>
   </div>

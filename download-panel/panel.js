@@ -10,7 +10,6 @@ function fmt_filesize(bytes) {
   return size + ' ' + units[i];
 }
 
-/*
 function debug(t) {
   if (typeof t != 'string') {
     t = JSON.stringify(t);
@@ -25,7 +24,6 @@ function debug(t) {
   li.appendChild(document.createTextNode(t));
   list.appendChild(li);
 }
-*/
 
 window.addEventListener('load', function() {
   var history = [];
@@ -127,6 +125,7 @@ window.addEventListener('load', function() {
   if (window.top != window) {
     document.body.className = 'devtools';
     var network_entries = [];
+    var network_regex_input = document.getElementById('network_regex');
     var network_minsize_checkbox = document.getElementById('network_minsize_checkbox');
     var network_minsize_input = document.getElementById('network_minsize');
     var network_list = document.getElementById('network');
@@ -157,6 +156,9 @@ window.addEventListener('load', function() {
     network_minsize_input.addEventListener('focus', minsize_change);
     network_minsize_input.addEventListener('keyup', minsize_change);
     network_minsize_input.addEventListener('search', minsize_change);
+    network_regex_input.addEventListener('focus', filter_network_list);
+    network_regex_input.addEventListener('keyup', filter_network_list);
+    network_regex_input.addEventListener('search', filter_network_list);
 
     function clear_network_list() {
       while (network_list.hasChildNodes()) {
@@ -229,22 +231,25 @@ window.addEventListener('load', function() {
       if (network_minsize_checkbox.checked) {
         var minsize = network_minsize_input.value;
         var suffix = minsize.slice(-1).toLowerCase();
-        var num = minsize.substring(0, minsize.length-1);
+        minsize = parseInt(minsize, 10); // it is fine to parse even with trailing characters, they will just be ignored
 
         if (suffix == 'k') {
-          minsize = parseInt(num, 10) * 1024;
+          minsize = minsize * 1024;
         }
         else if (suffix == 'm') {
-          minsize = parseInt(num, 10) * 1024 * 1024;
+          minsize = minsize * 1024 * 1024;
         }
         else if (suffix == 'g') {
-          minsize = parseInt(num, 10) * 1024 * 1024 * 1024;
-        }
-        else {
-          minsize = parseInt(minsize, 10);
+          minsize = minsize * 1024 * 1024 * 1024;
         }
 
         if (entry.response.content.size < minsize) {
+          return false;
+        }
+      }
+      if (network_regex_input.value != '') {
+        var re = new RegExp(network_regex_input.value, 'i');
+        if (!re.test(entry.request.url)) {
           return false;
         }
       }
@@ -286,5 +291,9 @@ window.addEventListener('load', function() {
         }
       }
     });
+
+    // chrome.devtools.network.onNavigated.addListener(function(url) {
+    //   debug(url);
+    // });
   }
 });
