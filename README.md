@@ -2,6 +2,8 @@
 
 Adds a download tab to your devtools!
 
+Icon from: http://www.iconarchive.com/show/100-flat-icons-by-graphicloads/download-3-icon.html
+
 
 # Changelog
 

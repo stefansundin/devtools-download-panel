@@ -2,6 +2,13 @@
   "name": "Download panel",
   "version": "0.0.2",
   "description": "Adds a download panel to Developer Tools.",
+  "icons": {
+    "16": "img/icon16.png",
+    "32": "img/icon32.png",
+    "48": "img/icon48.png",
+    "128": "img/icon128.png",
+    "256": "img/icon256.png"
+  },
   "background": {
       "scripts": [ "background.js" ]
   },
