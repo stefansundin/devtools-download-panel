@@ -5,11 +5,11 @@ input[type=search] {
 p {
   margin: .4em 0;
 }
+button {
+  margin: 0 .2em 0 0;
+}
 h3 {
   margin: 10px 0 0 0;
-}
-#history_header {
-  display: none;
 }
 ul {
   margin: 0;
@@ -23,17 +23,29 @@ a {
   cursor: pointer;
   text-decoration: none;
 }
+a[disabled] {
+  color: black;
+  cursor: not-allowed;
+}
 
-.network {
+.network, .history {
   display: none;
 }
-body.devtools .network {
+body[devtools] .network,
+body[history] .history {
   display: block;
 }
+
 #network_minsize {
   width: 90px;
   color: gray;
 }
 #network_minsize.enabled {
   color: black;
+}
+
+.network h3,
+.history h3 {
+  display: inline-block;
+  margin-right: 10px;
 }

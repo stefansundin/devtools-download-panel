@@ -41,8 +41,12 @@ window.addEventListener('load', function() {
   var filename_input = document.getElementById('filename');
   var download_button = document.getElementById('download');
   var saveas_button = document.getElementById('saveas');
+  var history_list = document.getElementById('history');
 
   function start_download(opts) {
+    if (opts.url == '') {
+      return;
+    }
     if (opts.filename == '') {
       delete opts.filename;
     }
@@ -50,10 +54,8 @@ window.addEventListener('load', function() {
       opts: opts
     });
 
+    document.body.setAttribute('history', '');
     history.push(opts.url);
-    var history_list = document.getElementById('history');
-    var history_header = document.getElementById('history_header');
-    history_header.style.display = 'block'
     var li = document.createElement('li');
     var a = document.createElement('a');
     a.appendChild(document.createTextNode(opts.url));
@@ -108,6 +110,7 @@ window.addEventListener('load', function() {
       document.execCommand('paste');
       var text = url_input.value;
       if (history.indexOf(text) !== -1) {
+        // don't use the pasted url if we have it in history
         url_input.value = '';
       }
       else {
@@ -292,6 +295,15 @@ window.addEventListener('load', function() {
 
   // action links
   var actions = {
+    'clear-history': function() {
+      while (history.length > 0) {
+        history.pop();
+      }
+      while (history_list.hasChildNodes()) {
+        history_list.removeChild(history_list.firstChild);
+      }
+      document.body.removeAttribute('history');
+    },
     'clear-network': function() {
       network_entries = [];
       clear_network_list();
@@ -315,7 +327,7 @@ window.addEventListener('load', function() {
 
   // Only try to inspect network requests if we're a devtools page (opening the chrome-extension url in an entire tab will cause Aw Snap)
   if (window.top != window) {
-    document.body.className = 'devtools';
+    document.body.setAttribute('devtools', '');
 
     chrome.devtools.network.getHAR(function(har_log) {
       network_entries = network_entries.concat(har_log.entries.filter(valid_request));
@@ -327,8 +339,8 @@ window.addEventListener('load', function() {
         network_entries.push(har_entry);
         if (filter_request(har_entry)) {
           add_network_entry(har_entry);
-          update_request_stats();
         }
+        update_request_stats();
       }
     });
 
