@@ -37,6 +37,3 @@ body.devtools .network {
 #network_minsize.enabled {
   color: black;
 }
-#network_clear {
-  display: none;
-}

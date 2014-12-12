@@ -131,7 +131,6 @@ window.addEventListener('load', function() {
   var network_minsize_checkbox = document.getElementById('network_minsize_checkbox');
   var network_minsize_input = document.getElementById('network_minsize');
   var network_list = document.getElementById('network');
-  var network_clear = document.getElementById('network_clear');
   var network_stats = document.getElementById('network_stats');
   network_minsize_checkbox.addEventListener('change', function() {
     network_minsize_input.className = this.checked ? 'enabled' : '';
@@ -178,17 +177,9 @@ window.addEventListener('load', function() {
     while (network_list.hasChildNodes()) {
       network_list.removeChild(network_list.firstChild);
     }
-    network_clear.style.display = 'none';
   }
 
-  network_clear.addEventListener('click', function() {
-    network_entries = [];
-    clear_network_list();
-    update_request_stats();
-  });
-
   function add_network_entry(entry) {
-    network_clear.style.display = 'block';
     var li = document.createElement('li');
 
     // instant download link
@@ -270,6 +261,12 @@ window.addEventListener('load', function() {
     return true;
   }
 
+  function download_request(entry) {
+    start_download({
+      url: entry.request.url
+    });
+  }
+
   function update_request_stats() {
     var shown = network_list.childNodes.length;
     var total = network_entries.length;
@@ -291,6 +288,29 @@ window.addEventListener('load', function() {
     clear_network_list();
     network_entries.filter(filter_request).forEach(add_network_entry);
     update_request_stats();
+  }
+
+  // action links
+  var actions = {
+    'clear-network': function() {
+      network_entries = [];
+      clear_network_list();
+      update_request_stats();
+    },
+    'reload': function() {
+      chrome.devtools.inspectedWindow.reload({ ignoreCache: true });
+    },
+    'grab-links': function() {
+    },
+    'download-all': function() {
+      network_entries.filter(filter_request).forEach(download_request);
+    },
+  };
+
+  var links = document.querySelectorAll('[action]');
+  for (var i=0; i < links.length; i++) {
+    var link = links[i];
+    link.addEventListener('click', actions[link.getAttribute('action')]);
   }
 
   // Only try to inspect network requests if we're a devtools page (opening the chrome-extension url in an entire tab will cause Aw Snap)
@@ -316,4 +336,5 @@ window.addEventListener('load', function() {
     //   debug(url);
     // });
   }
+
 });
