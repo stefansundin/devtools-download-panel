@@ -1,5 +1,6 @@
 input[type=search] {
   width: 90%;
+  font-family: Courier New;
 }
 p {
   margin: .4em 0;

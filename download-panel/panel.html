@@ -17,17 +17,17 @@
     <h3 id="network_header">Network</h3>
     <p>Note: Due to limitations in the devtools API, requests only show up here after they are completed/canceled.</p>
 
-    <p>Network request capture regex (matches whole url):</p>
+    <p>Network request capture <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions" target="_blank">regex</a> (matches whole url):
+      <a regex-filter="" title="clear regex">none</a> |
+      <a regex-filter="\.(z(ip|[0-9]{2})|r(ar|[0-9]{2})|jar|bz2|gz|tar|rpm|7z(ip)?|lzma|xz)($|\?)">archives</a> |
+      <a regex-filter="\.(exe|msi|dmg|bin|xpi|iso)($|\?)">binaries</a> |
+      <a regex-filter="\.(css|js|html|json)($|\?)">web</a> |
+      <a regex-filter="\.(jp(e?g|e|2)|gif|png|tiff?|bmp|ico)($|\?)">images</a> |
+      <a regex-filter="\.(mpeg|ra?m|avi|mp(g|e|4)|mov|divx|asf|qt|wmv|m\dv|rv|vob|asx|ogm|ogv|webm)($|\?)">videos</a> |
+      <a regex-filter="\.(mp3|wav|og(g|a)|flac|midi?|rm|aac|wma|mka|ape)($|\?)">audio</a> |
+      <a regex-filter="\.(pdf|xlsx?|docx?|odf|odt|rtf)($|\?)">documents</a>
+    </p>
     <p><input type="search" id="network_regex" list="regex_examples" placeholder="\.mp4$"></p>
-    <datalist id="regex_examples">
-      <option value="\.(z(ip|[0-9]{2})|r(ar|[0-9]{2})|jar|bz2|gz|tar|rpm|7z(ip)?|lzma|xz)($|\?)">Archive files</option>
-      <option value="\.(exe|msi|dmg|bin|xpi|iso)($|\?)">Binary files</option>
-      <option value="\.(css|js|html|json)($|\?)">Web files</option>
-      <option value="\.(jp(e?g|e|2)|gif|png|tiff?|bmp|ico)($|\?)">Image files</option>
-      <option value="\.(mpeg|ra?m|avi|mp(g|e|4)|mov|divx|asf|qt|wmv|m\dv|rv|vob|asx|ogm|ogv|webm)($|\?)">Video files</option>
-      <option value="\.(mp3|wav|og(g|a)|flac|midi?|rm|aac|wma|mka|ape)($|\?)">Audio files</option>
-      <option value="\.(pdf|xlsx?|docx?|odf|odt|rtf)($|\?)">Document files</option>
-    </datalist>
 
     <p><label><input type="checkbox" id="network_minsize_checkbox"> Minimum size:</label> <input type="search" id="network_minsize" title="k, m and g are supported suffixes" value="1m"></p>
     <button id="network_clear">Clear</button>

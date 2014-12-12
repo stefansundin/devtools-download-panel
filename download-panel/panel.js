@@ -12,7 +12,12 @@ function fmt_filesize(bytes) {
 
 function debug(t) {
   if (typeof t != 'string') {
-    t = JSON.stringify(t);
+    try {
+      t = JSON.stringify(t);
+    }
+    catch (e) {
+      t = e.message;
+    }
   }
   var list = document.getElementById('log_list');
   if (list == null) {
@@ -121,161 +126,176 @@ window.addEventListener('load', function() {
     }
   });
 
-  // Only try to inspect network requests if we're a devtools page (opening the chrome-extension url in an entire tab will cause Aw Snap)
-  if (window.top != window) {
-    document.body.className = 'devtools';
-    var network_entries = [];
-    var network_regex_input = document.getElementById('network_regex');
-    var network_minsize_checkbox = document.getElementById('network_minsize_checkbox');
-    var network_minsize_input = document.getElementById('network_minsize');
-    var network_list = document.getElementById('network');
-    var network_clear = document.getElementById('network_clear');
-    var network_stats = document.getElementById('network_stats');
-    network_minsize_checkbox.addEventListener('change', function() {
-      network_minsize_input.className = this.checked ? 'enabled' : '';
-      filter_network_list();
-    });
+  var network_entries = [];
+  var network_regex_input = document.getElementById('network_regex');
+  var network_minsize_checkbox = document.getElementById('network_minsize_checkbox');
+  var network_minsize_input = document.getElementById('network_minsize');
+  var network_list = document.getElementById('network');
+  var network_clear = document.getElementById('network_clear');
+  var network_stats = document.getElementById('network_stats');
+  network_minsize_checkbox.addEventListener('change', function() {
+    network_minsize_input.className = this.checked ? 'enabled' : '';
+    filter_network_list();
+  });
 
-    function minsize_change(e) {
-      if (!network_minsize_checkbox.checked) {
-        if (this.value != '') {
-          network_minsize_checkbox.checked = true;
-          network_minsize_input.className = 'enabled';
-          filter_network_list();
-        }
-      }
-      else {
-        if (this.value == '') {
-          network_minsize_checkbox.checked = false;
-          network_minsize_input.className = '';
-        }
+  function minsize_change(e) {
+    if (!network_minsize_checkbox.checked) {
+      if (this.value != '') {
+        network_minsize_checkbox.checked = true;
+        network_minsize_input.className = 'enabled';
         filter_network_list();
       }
     }
-
-    network_minsize_input.addEventListener('focus', minsize_change);
-    network_minsize_input.addEventListener('keyup', minsize_change);
-    network_minsize_input.addEventListener('search', minsize_change);
-    network_regex_input.addEventListener('focus', filter_network_list);
-    network_regex_input.addEventListener('keyup', filter_network_list);
-    network_regex_input.addEventListener('search', filter_network_list);
-
-    function clear_network_list() {
-      while (network_list.hasChildNodes()) {
-        network_list.removeChild(network_list.firstChild);
+    else {
+      if (this.value == '') {
+        network_minsize_checkbox.checked = false;
+        network_minsize_input.className = '';
       }
-      network_clear.style.display = 'none';
+      filter_network_list();
     }
+  }
 
-    network_clear.addEventListener('click', function() {
-      network_entries = [];
-      clear_network_list();
-      update_request_stats();
+  network_minsize_input.addEventListener('focus', minsize_change);
+  network_minsize_input.addEventListener('keyup', minsize_change);
+  network_minsize_input.addEventListener('search', minsize_change);
+  network_regex_input.addEventListener('focus', filter_network_list);
+  network_regex_input.addEventListener('keyup', filter_network_list);
+  network_regex_input.addEventListener('search', filter_network_list);
+
+  var filters = document.querySelectorAll('[regex-filter]');
+  for (var i=0; i < filters.length; i++) {
+    var filter = filters[i];
+    filter.addEventListener('click', function() {
+      network_regex_input.value = this.getAttribute('regex-filter');
+      filter_network_list();
     });
+    if (filter.title == '') {
+      filter.title = filter.getAttribute('regex-filter');
+    }
+  }
 
-    function add_network_entry(entry) {
-      network_clear.style.display = 'block';
-      var li = document.createElement('li');
+  function clear_network_list() {
+    while (network_list.hasChildNodes()) {
+      network_list.removeChild(network_list.firstChild);
+    }
+    network_clear.style.display = 'none';
+  }
 
-      // instant download link
-      li.appendChild(document.createTextNode('['));
-      var a = document.createElement('a');
-      a.title = 'Instant download';
-      a.appendChild(document.createTextNode('download'));
-      a.addEventListener('click', function(e) {
-        // middle click uses saveAs
-        start_download({
-          url: entry.request.url,
-          saveAs: e.which == 2
-        });
+  network_clear.addEventListener('click', function() {
+    network_entries = [];
+    clear_network_list();
+    update_request_stats();
+  });
+
+  function add_network_entry(entry) {
+    network_clear.style.display = 'block';
+    var li = document.createElement('li');
+
+    // instant download link
+    li.appendChild(document.createTextNode('['));
+    var a = document.createElement('a');
+    a.title = 'Instant download';
+    a.appendChild(document.createTextNode('download'));
+    a.addEventListener('click', function(e) {
+      // middle click uses saveAs
+      start_download({
+        url: entry.request.url,
+        saveAs: e.which == 2
+      });
+      url_input.value = entry.request.url;
+      filename_input.focus();
+    });
+    li.appendChild(a);
+    li.appendChild(document.createTextNode('] '));
+
+    // link to populate form
+    var a = document.createElement('a');
+    a.appendChild(document.createTextNode(entry.request.url));
+    a.href = entry.request.url;
+    a.addEventListener('click', function(e) {
+      // allow middle click to open link in new window
+      if (e.which == 1) {
+        e.preventDefault();
         url_input.value = entry.request.url;
         filename_input.focus();
-      });
-      li.appendChild(a);
-      li.appendChild(document.createTextNode('] '));
+      }
+    });
+    li.appendChild(a);
+    li.appendChild(document.createTextNode(' ('+fmt_filesize(entry.response.content.size)+')'));
+    li.title = entry.request.url+' ('+fmt_filesize(entry.response.content.size)+')';
+    network_list.appendChild(li);
+  }
 
-      // link to populate form
-      var a = document.createElement('a');
-      a.appendChild(document.createTextNode(entry.request.url));
-      a.href = entry.request.url;
-      a.addEventListener('click', function(e) {
-        // allow middle click to open link in new window
-        if (e.which == 1) {
-          e.preventDefault();
-          url_input.value = entry.request.url;
-          filename_input.focus();
-        }
-      });
-      li.appendChild(a);
-      li.appendChild(document.createTextNode(' ('+fmt_filesize(entry.response.content.size)+')'));
-      li.title = entry.request.url+' ('+fmt_filesize(entry.response.content.size)+')';
-      network_list.appendChild(li);
+  function valid_request(entry) {
+    // ignore data uris (0), redirects (3xx)
+    var status = entry.response.status;
+    if (status == 0 || (status >= 300 && status <= 400)) {
+      return false;
     }
+    // don't allow duplicate urls
+    if (network_entries.some(function(existing_entry) {
+      return (existing_entry.request.url == entry.request.url);
+    })) {
+      return false;
+    }
+    return true;
+  }
 
-    function valid_request(entry) {
-      // ignore data uris (0), redirects (3xx)
-      var status = entry.response.status;
-      if (status == 0 || (status >= 300 && status <= 400)) {
+  function filter_request(entry) {
+    if (network_minsize_checkbox.checked) {
+      var minsize = network_minsize_input.value;
+      var suffix = minsize.slice(-1).toLowerCase();
+      minsize = parseInt(minsize, 10); // it is fine to parse even with trailing characters, they will just be ignored
+
+      if (suffix == 'k') {
+        minsize = minsize * 1024;
+      }
+      else if (suffix == 'm') {
+        minsize = minsize * 1024 * 1024;
+      }
+      else if (suffix == 'g') {
+        minsize = minsize * 1024 * 1024 * 1024;
+      }
+
+      if (entry.response.content.size < minsize) {
         return false;
       }
-      // don't allow duplicate urls
-      if (network_entries.some(function(existing_entry) {
-        return (existing_entry.request.url == entry.request.url);
-      })) {
+    }
+    if (network_regex_input.value != '') {
+      var re = new RegExp(network_regex_input.value, 'i');
+      if (!re.test(entry.request.url)) {
         return false;
       }
-      return true;
     }
+    return true;
+  }
 
-    function filter_request(entry) {
-      if (network_minsize_checkbox.checked) {
-        var minsize = network_minsize_input.value;
-        var suffix = minsize.slice(-1).toLowerCase();
-        minsize = parseInt(minsize, 10); // it is fine to parse even with trailing characters, they will just be ignored
-
-        if (suffix == 'k') {
-          minsize = minsize * 1024;
-        }
-        else if (suffix == 'm') {
-          minsize = minsize * 1024 * 1024;
-        }
-        else if (suffix == 'g') {
-          minsize = minsize * 1024 * 1024 * 1024;
-        }
-
-        if (entry.response.content.size < minsize) {
-          return false;
-        }
-      }
-      if (network_regex_input.value != '') {
-        var re = new RegExp(network_regex_input.value, 'i');
-        if (!re.test(entry.request.url)) {
-          return false;
-        }
-      }
-      return true;
+  function update_request_stats() {
+    var shown = network_list.childNodes.length;
+    var total = network_entries.length;
+    while (network_stats.hasChildNodes()) {
+      network_stats.removeChild(network_stats.firstChild);
     }
-
-    function update_request_stats() {
-      while (network_stats.hasChildNodes()) {
-        network_stats.removeChild(network_stats.firstChild);
-      }
-      if (network_minsize_checkbox.checked) {
-        network_stats.appendChild(document.createTextNode('Showing '+network_list.childNodes.length+' / '+network_entries.length+' requests.'));
-      }
-      else if (network_list.childNodes.length == 0) {
-        network_stats.appendChild(document.createTextNode('No requests captured.'));
-      }
-      else {
-        network_stats.appendChild(document.createTextNode('Captured '+network_list.childNodes.length+' requests.'));
-      }
+    if (shown != total) {
+      network_stats.appendChild(document.createTextNode('Showing '+shown+' / '+total+' requests.'));
     }
-
-    function filter_network_list() {
-      clear_network_list();
-      network_entries.filter(filter_request).forEach(add_network_entry);
-      update_request_stats();
+    else if (total == 0) {
+      network_stats.appendChild(document.createTextNode('No requests captured.'));
     }
+    else {
+      network_stats.appendChild(document.createTextNode('Captured '+shown+' requests.'));
+    }
+  }
+
+  function filter_network_list() {
+    clear_network_list();
+    network_entries.filter(filter_request).forEach(add_network_entry);
+    update_request_stats();
+  }
+
+  // Only try to inspect network requests if we're a devtools page (opening the chrome-extension url in an entire tab will cause Aw Snap)
+  if (window.top != window) {
+    document.body.className = 'devtools';
 
     chrome.devtools.network.getHAR(function(har_log) {
       network_entries = network_entries.concat(har_log.entries.filter(valid_request));
