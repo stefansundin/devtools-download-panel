@@ -1,5 +1,11 @@
 
-// We can't initiate downloads from the devtools tab, so pass a message to this background script which initiates the download... Duh.
+// We can't initiate downloads from the devtools tab, so pass a message to this background script which initiates the download... Doh!
+
+var platform;
+
+chrome.runtime.getPlatformInfo(function(info) {
+  platform = info;
+});
 
 chrome.runtime.onMessage.addListener(
   function(message, sender, sendResponse) {
@@ -8,6 +14,12 @@ chrome.runtime.onMessage.addListener(
     }
     else if (message.action == 'open-tab') {
       chrome.tabs.create(message.opts);
+    }
+    else if (message.action == 'open-downloads-folder') {
+      chrome.downloads.showDefaultFolder();
+    }
+    else if (message.action == 'get-platform') {
+      sendResponse({ platform: platform });
     }
   }
 );

@@ -1,4 +1,6 @@
 
+// We have to use a lot of setTimeout in click handlers unfortunately, otherwise it will cause another click if the content scrolls up due to what happens in the handler.
+
 function fmt_filesize(bytes) {
   var units = ['bytes', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
   var i = 0;
@@ -68,7 +70,6 @@ window.addEventListener('load', function() {
         url_input.value = opts.url;
         filename_input.value = (opts.filename ? opts.filename : '');
         setTimeout(function() {
-          // we have to do this in a setTimeout unfortunately, otherwise it may cause another click where the mouse cursor ends up after scrolling up (usually on a network link)
           filename_input.focus();
         }, 100);
       }
@@ -212,21 +213,24 @@ window.addEventListener('load', function() {
         e.preventDefault();
         url_input.value = entry.request.url;
         setTimeout(function() {
-          // we have to do this in a setTimeout unfortunately, otherwise it may cause another click where the mouse cursor ends up after scrolling up
           filename_input.focus();
         }, 100);
       }
     });
     li.appendChild(a);
-    li.appendChild(document.createTextNode(' ('+fmt_filesize(entry.response.content.size)+')'));
-    li.title = entry.request.url+' ('+fmt_filesize(entry.response.content.size)+')';
+    li.title = entry.request.url;
+    var size = entry.response.content.size;
+    if (size >= 0) {
+      li.appendChild(document.createTextNode(' ('+fmt_filesize(size)+')'));
+      li.title += ' ('+fmt_filesize(size)+')';
+    }
     network_list.appendChild(li);
   }
 
   function valid_request(entry) {
-    // ignore data uris (0), redirects (3xx)
+    // ignore data uris (0), redirects (3xx), grab resources: empty url, chrome-extension, about:, extensions:
     var status = entry.response.status;
-    if (status == 0 || (status >= 300 && status <= 400)) {
+    if (status == 0 || (status >= 300 && status <= 400) || entry.request.url == "" || entry.request.url.indexOf('chrome-extension://') === 0 || entry.request.url.indexOf('about:') === 0 || entry.request.url.indexOf('extensions:') === 0) {
       return false;
     }
     // don't allow duplicate urls
@@ -298,47 +302,76 @@ window.addEventListener('load', function() {
 
   // action links
   var actions = {
-    'clear-history': function() {
+    'clear-history': function(e) {
       while (history.length > 0) {
         history.pop();
       }
-      while (history_list.hasChildNodes()) {
-        history_list.removeChild(history_list.firstChild);
-      }
-      document.body.removeAttribute('history');
+      setTimeout(function() {
+        while (history_list.hasChildNodes()) {
+          history_list.removeChild(history_list.firstChild);
+        }
+        document.body.removeAttribute('history');
+      }, 100);
     },
-    'clear-network': function() {
+    'clear-network': function(e) {
       network_entries = [];
       clear_network_list();
       update_request_stats();
     },
-    'reload': function() {
+    'reload': function(e) {
       chrome.devtools.inspectedWindow.reload({ ignoreCache: true });
     },
-    'grab-links': function() {
+    'grab-links': function(e) {
     },
-    'download-all': function() {
+    'grab-resources': function(e) {
+      chrome.devtools.inspectedWindow.getResources(function(resources) {
+        // we're faking HAR entries here, we'll see if this holds up in the future
+        for (var resource of resources) {
+          var entry = {
+            request: {
+              url: resource.url
+            },
+            response: {
+              status: 200,
+              content: { size: -1 }
+            }
+          };
+          if (valid_request(entry)) {
+            network_entries.push(entry);
+          }
+        }
+        filter_network_list();
+      });
+    },
+    'download-all': function(e) {
       network_entries.filter(filter_request).forEach(download_request);
     },
-    'open-downloads-tab': function() {
+    'open-tab': function(e) {
       chrome.runtime.sendMessage({
         action: 'open-tab',
-        opts: { url: 'chrome://downloads' }
+        opts: { url: e.srcElement.href }
       });
     },
-    'change-downloads-settings': function() {
-      chrome.runtime.sendMessage({
-        action: 'open-tab',
-        opts: { url: 'chrome://settings/search#download%20location' }
-      });
+    'open-downloads-folder': function(e) {
+      chrome.runtime.sendMessage({ action: 'open-downloads-folder' });
     },
   };
 
   var links = document.querySelectorAll('[action]');
   for (var i=0; i < links.length; i++) {
     var link = links[i];
-    link.addEventListener('click', actions[link.getAttribute('action')]);
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      actions[this.getAttribute('action')](e);
+    });
   }
+
+  chrome.runtime.sendMessage({ action: 'get-platform' }, function(platform) {
+    var links = document.querySelectorAll('a[href="chrome://downloads"]');
+    for (var i=0; i < links.length; i++) {
+      links[i].title = platform.os == 'mac' ? '⌘-Shift-J' : 'Ctrl+J';
+    }
+  });
 
   // Only try to inspect network requests if we're a devtools page (opening the chrome-extension url in an entire tab will cause Aw Snap)
   if (window.top != window) {

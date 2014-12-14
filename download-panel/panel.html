@@ -9,16 +9,18 @@
   <p><input type="search" id="filename" placeholder="video.flv"></p>
   <button id="download">Download</button>
   <button id="saveas">Save As</button>
-  <a href="#" action="open-downloads-tab" title="Ctrl+J / ⌘-Shift-J">open downloads tab</a> |
-  <a href="#" action="change-downloads-settings" title="chrome://settings/search#download%20location">change download settings</a> |
+  <a href="chrome://downloads" action="open-tab">open downloads tab</a> |
+  <a href="chrome://settings/search#download%20location" action="open-tab" title="chrome://settings/search#download%20location">change download settings</a> |
+  <a href="#" action="open-downloads-folder" title="open your downloads folder">open downloads folder</a> |
   <a id="version" href="https://github.com/stefansundin/chrome-download-panel" title="https://github.com/stefansundin/chrome-download-panel" target="_blank"></a> |
   <a href="panel.html" target="_blank">open panel.html</a> (for debugging)
 
   <div class="network">
-    <h3 id="network_header">Network</h3>
+    <h3>Network</h3>
     <a href="#" action="clear-network" title="clear network requests">clear</a> |
     <a href="#" action="reload" title="hard reload page">reload</a> |
     <a href="#" action="grab-links" title="grab urls from all page links" disabled>grab links</a> |
+    <a href="#" action="grab-resources" title="grab loaded resources">grab resources</a> |
     <a href="#" action="download-all" title="download filtered requests">download all</a>
 
     <p>Note: Due to limitations in the devtools API, requests only show up here after they are completed/canceled.</p>
