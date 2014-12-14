@@ -45,6 +45,18 @@ window.addEventListener('load', function() {
   var saveas_button = document.getElementById('saveas');
   var history_list = document.getElementById('history');
 
+  // prevent Esc key from bringing up the console in input fields
+  function keydown(e) {
+    if (e.keyCode == 27) {
+      e.stopPropagation();
+    }
+  }
+
+  var inputs = document.getElementsByTagName('input');
+  for (var i=0; i < inputs.length; i++) {
+    inputs[i].addEventListener('keydown', keydown);
+  }
+
   function start_download(opts) {
     if (opts.url == '') {
       return;
