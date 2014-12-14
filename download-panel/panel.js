@@ -373,7 +373,7 @@ window.addEventListener('load', function() {
     }
   });
 
-  // Only try to inspect network requests if we're a devtools page (opening the chrome-extension url in an entire tab will cause Aw Snap)
+  // Only try to inspect network requests if we're a devtools page (opening the chrome-extension url in its own tab will cause Aw Snap)
   if (window.top != window) {
     document.body.setAttribute('devtools', '');
 

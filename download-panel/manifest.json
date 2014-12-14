@@ -1,7 +1,7 @@
 {
   "name": "Download panel",
   "version": "0.0.3",
-  "description": "Adds a download panel to Developer Tools.",
+  "description": "Adds a download panel to the Developer Tools.",
   "icons": {
     "16": "img/icon16.png",
     "32": "img/icon32.png",

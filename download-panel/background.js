@@ -1,5 +1,5 @@
 
-// We can't initiate downloads from the devtools tab, so pass a message to this background script which initiates the download... Doh!
+// We can't initiate downloads from the devtools panel, so pass a message to this background script which initiates the download... Doh!
 
 var platform;
 
