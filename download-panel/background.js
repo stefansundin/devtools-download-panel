@@ -3,6 +3,11 @@
 
 chrome.runtime.onMessage.addListener(
   function(message, sender, sendResponse) {
-    chrome.downloads.download(message.opts);
+    if (message.action == 'download') {
+      chrome.downloads.download(message.opts);
+    }
+    else if (message.action == 'open-tab') {
+      chrome.tabs.create(message.opts);
+    }
   }
 );

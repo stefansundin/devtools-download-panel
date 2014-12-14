@@ -9,29 +9,30 @@
   <p><input type="search" id="filename" placeholder="video.flv"></p>
   <button id="download">Download</button>
   <button id="saveas">Save As</button>
-  <span id="version"></span>
-  |
+  <a href="#" action="open-downloads-tab" title="Ctrl+J / ⌘-Shift-J">open downloads tab</a> |
+  <a href="#" action="change-downloads-settings" title="chrome://settings/search#download%20location">change download settings</a> |
+  <a id="version" href="https://github.com/stefansundin/chrome-download-panel" title="https://github.com/stefansundin/chrome-download-panel" target="_blank"></a> |
   <a href="panel.html" target="_blank">open panel.html</a> (for debugging)
 
   <div class="network">
     <h3 id="network_header">Network</h3>
-    <a action="clear-network" title="clear network requests">clear</a> |
-    <a action="reload" title="hard reload page">reload</a> |
-    <a action="grab-links" title="grab urls from all page links" disabled>grab links</a> |
-    <a action="download-all" title="download filtered requests">download all</a>
+    <a href="#" action="clear-network" title="clear network requests">clear</a> |
+    <a href="#" action="reload" title="hard reload page">reload</a> |
+    <a href="#" action="grab-links" title="grab urls from all page links" disabled>grab links</a> |
+    <a href="#" action="download-all" title="download filtered requests">download all</a>
 
     <p>Note: Due to limitations in the devtools API, requests only show up here after they are completed/canceled.</p>
 
     <p>Network request capture <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions" title="open regex docs" target="_blank">regex</a> (matches whole url):
       &nbsp;&nbsp;
-      <a regex-filter="" title="clear regex">clear</a> |
-      <a regex-filter="\.(z(ip|[0-9]{2})|r(ar|[0-9]{2})|jar|bz2|gz|tar|rpm|7z(ip)?|lzma|xz|sig)($|\?)">archives</a> |
-      <a regex-filter="\.(exe|msi|dmg|bin|xpi|iso|deb|rpm|sig)($|\?)">binaries</a> |
-      <a regex-filter="\.(css|js|html?|json|xml|cgi|php)($|\?)">web</a> |
-      <a regex-filter="\.(jp(e?g|e|2)|gif|png|tiff?|bmp|ico|cr2)($|\?)">images</a> |
-      <a regex-filter="\.(mkv|mpeg|ra?m|avi|mp(g|e|4)|mov|divx|asf|qt|wmv|m\dv|rv|vob|asx|ogm|ogv|webm)($|\?)">videos</a> |
-      <a regex-filter="\.(mp3|wav|og(g|a)|flac|midi?|rm|aac|wma|mka|ape)($|\?)">audio</a> |
-      <a regex-filter="\.(pdf|xlsx?|docx?|odf|odt|rtf)($|\?)">documents</a>
+      <a href="#" regex-filter="" title="clear regex">clear</a> |
+      <a href="#" regex-filter="\.(z(ip|[0-9]{2})|r(ar|[0-9]{2})|jar|bz2|gz|tar|rpm|7z(ip)?|lzma|xz|sig)($|\?)">archives</a> |
+      <a href="#" regex-filter="\.(exe|msi|dmg|bin|xpi|iso|deb|rpm|sig)($|\?)">binaries</a> |
+      <a href="#" regex-filter="\.(css|js|html?|json|xml|cgi|php)($|\?)">web</a> |
+      <a href="#" regex-filter="\.(jp(e?g|e|2)|gif|png|tiff?|bmp|ico|cr2)($|\?)">images</a> |
+      <a href="#" regex-filter="\.(mkv|mpeg|ra?m|avi|mp(g|e|4)|mov|divx|asf|qt|wmv|m\dv|rv|vob|asx|ogm|ogv|webm)($|\?)">videos</a> |
+      <a href="#" regex-filter="\.(mp3|wav|og(g|a)|flac|midi?|rm|aac|wma|mka|ape)($|\?)">audio</a> |
+      <a href="#" regex-filter="\.(pdf|xlsx?|docx?|odf|odt|rtf)($|\?)">documents</a>
     </p>
     <p><input type="search" id="network_regex" list="regex_examples" placeholder="\.mp4$"></p>
 
@@ -43,7 +44,7 @@
 
   <div class="history">
     <h3>History</h3>
-    <a action="clear-history" title="clear history">clear</a>
+    <a href="#" action="clear-history" title="clear history">clear</a>
     <ul id="history"></ul>
   </div>
 </body>

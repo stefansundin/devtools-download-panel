@@ -51,6 +51,7 @@ window.addEventListener('load', function() {
       delete opts.filename;
     }
     chrome.runtime.sendMessage({
+      action: 'download',
       opts: opts
     });
 
@@ -65,10 +66,11 @@ window.addEventListener('load', function() {
       if (e.which == 1) {
         e.preventDefault();
         url_input.value = opts.url;
-        if (opts.filename) {
-          filename_input.value = opts.filename;
-        }
-        url_input.focus();
+        filename_input.value = (opts.filename ? opts.filename : '');
+        setTimeout(function() {
+          // we have to do this in a setTimeout unfortunately, otherwise it may cause another click where the mouse cursor ends up after scrolling up (usually on a network link)
+          filename_input.focus();
+        }, 100);
       }
     });
     li.appendChild(a);
@@ -110,7 +112,7 @@ window.addEventListener('load', function() {
       document.execCommand('paste');
       var text = url_input.value;
       if (history.indexOf(text) !== -1) {
-        // don't use the pasted url if we have it in history
+        // don't use the pasted url if we have it in the history
         url_input.value = '';
       }
       else {
@@ -196,8 +198,6 @@ window.addEventListener('load', function() {
         url: entry.request.url,
         saveAs: e.which == 2
       });
-      url_input.value = entry.request.url;
-      filename_input.focus();
     });
     li.appendChild(a);
     li.appendChild(document.createTextNode('] '));
@@ -211,7 +211,10 @@ window.addEventListener('load', function() {
       if (e.which == 1) {
         e.preventDefault();
         url_input.value = entry.request.url;
-        filename_input.focus();
+        setTimeout(function() {
+          // we have to do this in a setTimeout unfortunately, otherwise it may cause another click where the mouse cursor ends up after scrolling up
+          filename_input.focus();
+        }, 100);
       }
     });
     li.appendChild(a);
@@ -316,6 +319,18 @@ window.addEventListener('load', function() {
     },
     'download-all': function() {
       network_entries.filter(filter_request).forEach(download_request);
+    },
+    'open-downloads-tab': function() {
+      chrome.runtime.sendMessage({
+        action: 'open-tab',
+        opts: { url: 'chrome://downloads' }
+      });
+    },
+    'change-downloads-settings': function() {
+      chrome.runtime.sendMessage({
+        action: 'open-tab',
+        opts: { url: 'chrome://settings/search#download%20location' }
+      });
     },
   };
 
