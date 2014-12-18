@@ -1,3 +1,6 @@
+body {
+  padding-bottom: 30px;
+}
 input[type=search] {
   width: 90%;
   font-family: Courier New;
@@ -31,6 +34,21 @@ a[disabled] {
   color: black;
   cursor: not-allowed;
 }
+img.preview {
+  position: absolute;
+  left: 250px;
+  background-image: url(img/alpha.png);
+}
+#scroll-to-top {
+  position: fixed;
+  bottom: 0;
+  padding: 3px 8px;
+  background-color: white;
+  border: 1px solid black;
+  border-bottom: 0;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+}
 
 .network, .history {
   display: none;
@@ -42,7 +60,7 @@ body[history] .history {
 
 #network_minsize {
   width: 90px;
-  color: gray;
+  color: lightgray;
 }
 #network_minsize.enabled {
   color: black;

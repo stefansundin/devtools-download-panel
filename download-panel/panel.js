@@ -39,6 +39,24 @@ window.addEventListener('load', function() {
   var version_span = document.getElementById('version');
   version_span.appendChild(document.createTextNode('v'+version));
 
+  var scroll_to_top = document.getElementById('scroll-to-top');
+  scroll_to_top.addEventListener('click', function(e) {
+    window.scrollTo(0, 0);
+  });
+  window.addEventListener('scroll', function() {
+    if (window.pageYOffset > 0) {
+      if (scroll_to_top.style.display == 'none') {
+        scroll_to_top.style.display = 'block';
+      }
+    }
+    else {
+      if (scroll_to_top.style.display == 'block') {
+        scroll_to_top.style.display = 'none';
+      }
+    }
+  });
+
+
   var url_input = document.getElementById('url');
   var filename_input = document.getElementById('filename');
   var download_button = document.getElementById('download');
@@ -119,7 +137,7 @@ window.addEventListener('load', function() {
   download_button.addEventListener('click', download);
   saveas_button.addEventListener('click', saveas);
 
-  window.addEventListener('focus', function() {
+  // window.addEventListener('focus', function() {
     if (url_input.value == '') {
       url_input.focus();
       document.execCommand('paste');
@@ -142,7 +160,7 @@ window.addEventListener('load', function() {
     else if (filename_input.value == '') {
       filename_input.focus();
     }
-  });
+  // });
 
   var network_entries = [];
   var network_regex_input = document.getElementById('network_regex');
@@ -215,6 +233,26 @@ window.addEventListener('load', function() {
     li.appendChild(a);
     li.appendChild(document.createTextNode('] '));
 
+    // preview
+    if (entry.content) {
+      li.appendChild(document.createTextNode('['));
+      var a = document.createElement('a');
+      a.appendChild(document.createTextNode('preview'));
+      var img = document.createElement('img');
+      img.src = 'data:image/png;'+entry.content.encoding+','+entry.content.data;
+      img.className = 'preview';
+      a.addEventListener('mouseover', function(e) {
+        // img.style.left = (a.offsetLeft+a.clientWidth+5)+'px';
+        img.style.top = (a.offsetTop+a.clientHeight/2-img.height/2)+'px';
+        document.body.appendChild(img);
+      });
+      a.addEventListener('mouseout', function(e) {
+        document.body.removeChild(img);
+      });
+      li.appendChild(a);
+      li.appendChild(document.createTextNode('] '));
+    }
+
     // link to populate form
     var a = document.createElement('a');
     a.appendChild(document.createTextNode(entry.request.url));
@@ -230,7 +268,7 @@ window.addEventListener('load', function() {
       }
     });
     li.appendChild(a);
-    li.title = entry.request.url;
+    // li.title = entry.request.url;
     var size = entry.response.content.size;
     if (size >= 0) {
       li.appendChild(document.createTextNode(' ('+fmt_filesize(size)+')'));
@@ -296,13 +334,13 @@ window.addEventListener('load', function() {
       network_stats.removeChild(network_stats.firstChild);
     }
     if (shown != total) {
-      network_stats.appendChild(document.createTextNode('Showing '+shown+' / '+total+' requests.'));
+      network_stats.appendChild(document.createTextNode('Showing '+shown+' / '+total+' urls.'));
     }
     else if (total == 0) {
-      network_stats.appendChild(document.createTextNode('No requests captured.'));
+      network_stats.appendChild(document.createTextNode('No urls captured.'));
     }
     else {
-      network_stats.appendChild(document.createTextNode('Captured '+shown+' requests.'));
+      network_stats.appendChild(document.createTextNode('Captured '+shown+' urls.'));
     }
   }
 
@@ -312,12 +350,28 @@ window.addEventListener('load', function() {
     update_request_stats();
   }
 
+  function populate_urls(urls, isException) {
+    urls.forEach(function(url) {
+      var entry = {
+        request: {
+          url: url
+        },
+        response: {
+          status: 200,
+          content: { size: -1 }
+        }
+      };
+      if (valid_request(entry)) {
+        network_entries.push(entry);
+      }
+    });
+    filter_network_list();
+  }
+
   // action links
   var actions = {
     'clear-history': function(e) {
-      while (history.length > 0) {
-        history.pop();
-      }
+      history = [];
       setTimeout(function() {
         while (history_list.hasChildNodes()) {
           history_list.removeChild(history_list.firstChild);
@@ -333,12 +387,33 @@ window.addEventListener('load', function() {
     'reload': function(e) {
       chrome.devtools.inspectedWindow.reload({ ignoreCache: true });
     },
-    'grab-links': function(e) {
+    'grab-all-links': function(e) {
+      chrome.devtools.inspectedWindow.eval("(function(){\
+var urls = [];\
+var links = document.getElementsByTagName('a');\
+for (var i=0; i < links.length; i++) {\
+  urls.push(links[i].href);\
+}\
+return urls;\
+})()", populate_urls);
+    },
+    'grab-inspected-links': function(e) {
+      chrome.devtools.inspectedWindow.eval("(function(){\
+var urls = [];\
+if ($0.tagName == 'A') {\
+  urls.push($0.href);\
+}\
+var links = $0.getElementsByTagName('a');\
+for (var i=0; i < links.length; i++) {\
+  urls.push(links[i].href);\
+}\
+return urls;\
+})()", populate_urls);
     },
     'grab-resources': function(e) {
       chrome.devtools.inspectedWindow.getResources(function(resources) {
         // we're faking HAR entries here, we'll see if this holds up in the future
-        for (var resource of resources) {
+        resources.forEach(function(resource) {
           var entry = {
             request: {
               url: resource.url
@@ -349,9 +424,18 @@ window.addEventListener('load', function() {
             }
           };
           if (valid_request(entry)) {
-            network_entries.push(entry);
+            if (resource.type == 'image') {
+              resource.getContent(function(content, encoding) {
+                entry.content = { encoding: encoding, data:content };
+                network_entries.push(entry);
+                filter_network_list();
+              });
+            }
+            else {
+              network_entries.push(entry);
+            }
           }
-        }
+        });
         filter_network_list();
       });
     },
@@ -368,6 +452,17 @@ window.addEventListener('load', function() {
       chrome.runtime.sendMessage({ action: 'open-downloads-folder' });
     },
   };
+
+  chrome.devtools.panels.elements.onSelectionChanged.addListener(function() {
+    var link = document.querySelectorAll('[action="grab-inspected-links"]')[0];
+    link.removeAttribute('disabled');
+    chrome.devtools.inspectedWindow.eval("$0.getElementsByTagName('a').length;", function(count, isException) {
+      while (link.childNodes.length > 1) {
+        link.removeChild(link.lastChild);
+      }
+      link.appendChild(document.createTextNode(' ('+count+' links)'));
+    });
+  });
 
   var links = document.querySelectorAll('[action]');
   for (var i=0; i < links.length; i++) {
