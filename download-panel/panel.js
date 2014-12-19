@@ -280,12 +280,15 @@ window.addEventListener('load', function() {
   function valid_request(entry) {
     // ignore data uris (0), redirects (3xx), grab resources: empty url, chrome-extension, about:, extensions:
     var status = entry.response.status;
-    if (status == 0 || (status >= 300 && status <= 400) || entry.request.url == "" || entry.request.url.indexOf('chrome-extension://') === 0 || entry.request.url.indexOf('about:') === 0 || entry.request.url.indexOf('extensions:') === 0) {
+    var url = entry.request.url;
+    var prefix = url.substr(0, url.indexOf(':'));
+    var skip = ['', 'javascript', 'chrome-extension', 'about', 'extensions'];
+    if (status == 0 || (status >= 300 && status <= 400) || skip.indexOf(prefix) !== -1) {
       return false;
     }
     // don't allow duplicate urls
     if (network_entries.some(function(existing_entry) {
-      return (existing_entry.request.url == entry.request.url);
+      return (existing_entry.request.url == url);
     })) {
       return false;
     }
@@ -453,17 +456,6 @@ return urls;\
     },
   };
 
-  chrome.devtools.panels.elements.onSelectionChanged.addListener(function() {
-    var link = document.querySelectorAll('[action="grab-inspected-links"]')[0];
-    link.removeAttribute('disabled');
-    chrome.devtools.inspectedWindow.eval("$0.getElementsByTagName('a').length;", function(count, isException) {
-      while (link.childNodes.length > 1) {
-        link.removeChild(link.lastChild);
-      }
-      link.appendChild(document.createTextNode(' ('+count+' links)'));
-    });
-  });
-
   var links = document.querySelectorAll('[action]');
   for (var i=0; i < links.length; i++) {
     var link = links[i];
@@ -480,7 +472,7 @@ return urls;\
     }
   });
 
-  // Only try to inspect network requests if we're a devtools page (opening the chrome-extension url in its own tab will cause Aw Snap)
+  // Only try to use chrome.devtools.* APIs if we're a devtools page (opening the chrome-extension url in its own tab will cause Aw Snap)
   if (window.top != window) {
     document.body.setAttribute('devtools', '');
 
@@ -502,6 +494,26 @@ return urls;\
     // chrome.devtools.network.onNavigated.addListener(function(url) {
     //   debug(url);
     // });
+
+    chrome.devtools.panels.elements.onSelectionChanged.addListener(function() {
+      chrome.devtools.inspectedWindow.eval("(function(){ if ($0 !== undefined) { return $0.getElementsByTagName('a').length; } })()", function(count, e) {
+        if (e) {
+          debug('e: '+e.isError+', '+e.code+', '+e.description+', '+e.details+', '+e.isException+', '+e.value);
+        }
+        var link = document.querySelectorAll('[action="grab-inspected-links"]')[0];
+        while (link.childNodes.length > 1) {
+          link.removeChild(link.lastChild);
+        }
+        // count is undefined if there is no element selected, this happens when the user navigates to another page
+        if (count) {
+          link.removeAttribute('disabled');
+          link.appendChild(document.createTextNode(' ('+count+' links)'));
+        }
+        else {
+          link.setAttribute('disabled', true);
+        }
+      });
+    });
   }
 
 });
