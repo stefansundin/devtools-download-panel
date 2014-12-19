@@ -13,6 +13,9 @@ Icon from: http://www.iconarchive.com/show/100-flat-icons-by-graphicloads/downlo
 
 [![RSS](https://stefansundin.github.io/img/feed.png) Release feed](https://github.com/stefansundin/chrome-download-panel/releases.atom)
 
+**v0.0.4** - unreleased - [diff](https://github.com/stefansundin/chrome-download-panel/compare/v0.0.3...master):
+- Fix "undefined" in grab-inspected-links link text.
+
 **v0.0.3** - 2014-12-17 - [diff](https://github.com/stefansundin/chrome-download-panel/compare/v0.0.2...v0.0.3):
 - Add ability to grab urls from links on the page, either all links or only links that is within the element you are inspecting.
 - Add ability to grab the list of loaded resources.
