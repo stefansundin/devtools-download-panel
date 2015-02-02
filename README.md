@@ -9,6 +9,11 @@ When this extension fails to do the job, you can try [Chrono Download Manager](h
 Icon from: http://www.iconarchive.com/show/100-flat-icons-by-graphicloads/download-3-icon.html
 
 
+# Screenshot
+
+![RSS](screenshot.png)
+
+
 # Changelog
 
 [![RSS](https://stefansundin.github.io/img/feed.png) Release feed](https://github.com/stefansundin/chrome-download-panel/releases.atom)
