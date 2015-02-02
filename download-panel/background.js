@@ -9,6 +9,7 @@ chrome.runtime.getPlatformInfo(function(info) {
 
 chrome.runtime.onMessage.addListener(
   function(message, sender, sendResponse) {
+    console.log('received message: ', message, sender);
     if (message.action == 'download') {
       chrome.downloads.download(message.opts);
     }

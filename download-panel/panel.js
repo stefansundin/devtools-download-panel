@@ -76,12 +76,28 @@ window.addEventListener('load', function() {
   }
 
   function start_download(opts) {
+    if (opts.filename) {
+      var pattern = new RegExp(filename_input.pattern);
+      if (!pattern.test(opts.filename)) {
+        if (confirm('Your filename contains invalid characters. Invalid characters are: *?"<>:| and tabs.\n\nDo you want to automatically remove invalid characters?')) {
+          opts.filename = opts.filename.replace(/[:*?"<>|]/, '').replace(/\t+/, ' ');
+        }
+        else {
+          return;
+        }
+      }
+      if (/\/|\\/.test(opts.filename.slice(-1))) {
+        alert("While subdirs are fine, you can't end the filename with a slash or backslash.");
+        return;
+      }
+    }
     if (opts.url == '') {
       return;
     }
     if (opts.filename == '') {
       delete opts.filename;
     }
+
     chrome.runtime.sendMessage({
       action: 'download',
       opts: opts
@@ -349,8 +365,13 @@ window.addEventListener('load', function() {
 
   function filter_network_list() {
     clear_network_list();
-    network_entries.filter(filter_request).forEach(add_network_entry);
+    var entries = network_entries.filter(filter_request);
+    entries.forEach(add_network_entry);
     update_request_stats();
+    // autograb url if filtering only matches one
+    if (url_input.value == '' && entries.length == 1) {
+      url_input.value = entries[0].request.url;
+    }
   }
 
   function populate_urls(urls, isException) {
@@ -505,12 +526,12 @@ return urls;\
           link.removeChild(link.lastChild);
         }
         // count is undefined if there is no element selected, this happens when the user navigates to another page
-        if (count) {
-          link.removeAttribute('disabled');
-          link.appendChild(document.createTextNode(' ('+count+' links)'));
+        if (count === undefined) {
+          link.setAttribute('disabled', true);
         }
         else {
-          link.setAttribute('disabled', true);
+          link.removeAttribute('disabled');
+          link.appendChild(document.createTextNode(' ('+count+' links)'));
         }
       });
     });

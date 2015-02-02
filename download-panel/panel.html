@@ -6,7 +6,7 @@
 </head>
 <body>
   <p><input type="search" id="url" placeholder="http://"></p>
-  <p><input type="search" id="filename" placeholder="video.flv"></p>
+  <p><input type="search" id="filename" placeholder="subdir/video.flv" pattern='^[^\t:*?"<>|]*$'></p>
   <button id="download">Download</button>
   <button id="saveas">Save As</button>
   <a href="chrome://downloads" action="open-tab">open downloads tab</a> |
@@ -17,14 +17,13 @@
 
   <div class="network">
     <h3>Network</h3>
-    <a href="#" action="clear-network" title="clear captured requests">clear</a> |
-    <a href="#" action="reload" title="hard reload page">reload</a> |
-    <a href="#" action="grab-all-links" title="grab urls from all page links">grab all links</a> |
-    <a href="#" action="grab-inspected-links" title="grab urls from links inside inspected element (use magnifying glass in devtools navbar or select element in Elements tab)" disabled>grab links from inspected element</a> |
-    <a href="#" action="grab-resources" title="grab loaded resources (e.g. html, css, js and image files)">grab resources</a> |
-    <a href="#" action="download-all" title="download filtered requests">download all</a>
+    <a href="#" action="reload" title="hard reload page">reload page</a>
 
-    <p>Note: Due to limitations in the devtools API, requests only show up here after they are completed/canceled.</p>
+    <p><b>Special</b>:
+      <a href="#" action="grab-all-links" title="grab urls from all page links">grab all links</a> |
+      <a href="#" action="grab-inspected-links" title="grab urls from links inside inspected element (use magnifying glass in devtools navbar or select element in Elements tab)" disabled>grab links from inspected element</a> |
+      <a href="#" action="grab-resources" title="grab loaded resources (e.g. html, css, js and image files)">grab resources</a>
+    </p>
 
     <p>Filter urls by <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions" title="open regex docs" target="_blank">regex</a> (matches whole url):
       &nbsp;&nbsp;
@@ -33,16 +32,22 @@
       <a href="#" regex-filter="\.(exe|msi|dmg|bin|iso|deb|rpm|sig)($|\?)">binaries</a> |
       <a href="#" regex-filter="\.(css|js|html?|json|xml|cgi|php)($|\?)">web</a> |
       <a href="#" regex-filter="\.(jp(e?g|e|2)|gif|png|tiff?|bmp|ico|cr2)($|\?)">images</a> |
-      <a href="#" regex-filter="\.(mkv|mpeg|ra?m|avi|mp(g|e|4)|mov|divx|asf|qt|wmv|m\dv|rv|vob|asx|ogm|ogv|webm)($|\?)">videos</a> |
-      <a href="#" regex-filter="\.(mp3|wav|ogg|oga|flac|midi?|rm|aac|wma|mka|ape)($|\?)">audio</a> |
+      <a href="#" regex-filter="\.(mkv|mpeg|ra?m|avi|mp(g|e|4)|mov|divx|asf|qt|wmv|m\dv|rv|vob|asx|ogm|ogv|webm|flv)($|\?)">videos</a> |
+      <a href="#" regex-filter="\.(mp3|wav|ogg|oga|m4a|flac|midi?|rm|aac|wma|mka|ape)($|\?)">audio</a> |
       <a href="#" regex-filter="\.(pdf|odt|ods|odp|odb|odg|odf|rtf|docx?|xlsx?|pptx?)($|\?)">documents</a>
     </p>
     <p><input type="search" id="network_regex" list="regex_examples" placeholder="\.mp4$"></p>
 
     <p><label><input type="checkbox" id="network_minsize_checkbox"> Minimum size:</label> <input type="search" id="network_minsize" title="k, m and g are supported suffixes" value="1m"></p>
 
-    <p id="network_stats"></p>
-    <ul id="network"></ul>
+    <p>
+      <span id="network_stats"></span>
+      <a href="#" action="clear-network" title="clear captured requests">clear</a> |
+      <a href="#" action="download-all" title="download filtered requests">download all</a>
+      <ul id="network"></ul>
+    </p>
+
+    <p>Note: Due to limitations in the devtools API, requests only show up here after they are completed/canceled.</p>
   </div>
 
   <div class="history">

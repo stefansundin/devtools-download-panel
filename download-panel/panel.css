@@ -5,6 +5,9 @@ input[type=search] {
   width: 90%;
   font-family: Courier New;
 }
+input[pattern]:invalid{
+  background-color: red;
+}
 label {
   user-select: none;
   -webkit-user-select: none;
@@ -64,6 +67,12 @@ body[history] .history {
 }
 #network_minsize.enabled {
   color: black;
+}
+
+#network_stats {
+  display: inline-block;
+  min-width: 120px;
+  margin-right: 10px;
 }
 
 .network h3,
