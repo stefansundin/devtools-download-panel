@@ -213,6 +213,7 @@ window.addEventListener('load', function() {
   var network_regex_input = document.getElementById('network_regex');
   var network_minsize_checkbox = document.getElementById('network_minsize_checkbox');
   var network_minsize_input = document.getElementById('network_minsize');
+  var network_autoclear_checkbox = document.getElementById('network_autoclear_checkbox');
   var network_list = document.getElementById('network');
   var network_stats = document.getElementById('network_stats');
   network_minsize_checkbox.addEventListener('change', function() {
@@ -489,11 +490,12 @@ return urls;\
       });
     },
     'download-all': function(e) {
+      var filename = filename_input.value; // Save this value because the input field will be cleared after the first call
       network_entries.filter(filter_request).forEach(
         function(entry) {
           start_download({
             url: entry.request.url,
-            filename: filename_input.value
+            filename: filename
           });
         }
       );
@@ -544,9 +546,12 @@ return urls;\
       }
     });
 
-    // chrome.devtools.network.onNavigated.addListener(function(url) {
-    //   debug(url);
-    // });
+    chrome.devtools.network.onNavigated.addListener(function(url) {
+      // debug(url);
+      if (network_autoclear_checkbox.checked) {
+        actions['clear-network']();
+      }
+    });
 
     chrome.devtools.panels.elements.onSelectionChanged.addListener(function() {
       chrome.devtools.inspectedWindow.eval("(function(){ if ($0 !== undefined) { return $0.getElementsByTagName('a').length; } })()", function(count, e) {
