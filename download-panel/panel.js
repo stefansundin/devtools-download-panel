@@ -12,6 +12,26 @@ function fmt_filesize(bytes) {
   return size + ' ' + units[i];
 }
 
+function extract_filename(url) {
+  var filename = url.substr(url.lastIndexOf('/')+1);
+  var i = filename.indexOf('?');
+  if (i != -1) {
+    filename = filename.substr(0, i);
+  }
+  return filename;
+}
+
+function extract_extension(url) {
+  var filename = extract_filename(url);
+  var i = filename.lastIndexOf('.');
+  if (i != -1) {
+    return filename.substr(i+1);
+  }
+  else {
+    return '';
+  }
+}
+
 function debug(t) {
   if (typeof t != 'string') {
     try {
@@ -76,10 +96,13 @@ window.addEventListener('load', function() {
   }
 
   function start_download(opts) {
+    if (opts.url == '') {
+      return;
+    }
     if (opts.filename) {
       var pattern = new RegExp(filename_input.pattern);
       if (!pattern.test(opts.filename)) {
-        if (confirm('Your filename contains invalid characters. Invalid characters are: *?"<>:| and tabs.\n\nDo you want to automatically remove invalid characters?')) {
+        if (confirm('Your filename contains one or more invalid characters. Invalid characters are: *?"<>:| and tabs.\n\nDo you want to automatically remove the invalid characters?')) {
           opts.filename = opts.filename.replace(/[:*?"<>|]/, '').replace(/\t+/, ' ');
         }
         else {
@@ -87,12 +110,20 @@ window.addEventListener('load', function() {
         }
       }
       if (/\/|\\/.test(opts.filename.slice(-1))) {
-        alert("While subdirs are fine, you can't end the filename with a slash or backslash.");
-        return;
+        // Auto-detect filename from url and append it
+        var filename = extract_filename(opts.url);
+        if (filename == '') {
+          alert("While subdirs are fine, you can't end the filename with a slash or backslash. If a filename could be detected from the url, it would be automatically appended.");
+          return;
+        }
+        else {
+          opts.filename += filename;
+        }
       }
-    }
-    if (opts.url == '') {
-      return;
+      if (extract_extension(opts.filename) == '' && extract_extension(opts.url) != '') {
+        // Automatically use filename from url if there a file extension is missing in the filename field
+        opts.filename += '.'+extract_extension(opts.url);
+      }
     }
     if (opts.filename == '') {
       delete opts.filename;
@@ -340,12 +371,6 @@ window.addEventListener('load', function() {
     return true;
   }
 
-  function download_request(entry) {
-    start_download({
-      url: entry.request.url
-    });
-  }
-
   function update_request_stats() {
     var shown = network_list.childNodes.length;
     var total = network_entries.length;
@@ -464,7 +489,14 @@ return urls;\
       });
     },
     'download-all': function(e) {
-      network_entries.filter(filter_request).forEach(download_request);
+      network_entries.filter(filter_request).forEach(
+        function(entry) {
+          start_download({
+            url: entry.request.url,
+            filename: filename_input.value
+          });
+        }
+      );
     },
     'open-tab': function(e) {
       chrome.runtime.sendMessage({

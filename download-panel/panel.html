@@ -5,8 +5,8 @@
   <link rel="stylesheet" type="text/css" href="panel.css">
 </head>
 <body>
-  <p><input type="search" id="url" placeholder="http://"></p>
-  <p><input type="search" id="filename" placeholder="subdir/video.flv" pattern='^[^\t:*?"<>|]*$'></p>
+  <p><input type="search" id="url" placeholder="http://" spellcheck="false"></p>
+  <p><input type="search" id="filename" placeholder="subdir/video.flv" pattern='^[^\t:*?"<>|]*$' spellcheck="false"></p>
   <button id="download">Download</button>
   <button id="saveas">Save As</button>
   <a href="chrome://downloads" action="open-tab">open downloads tab</a> |
@@ -32,7 +32,7 @@
       <a href="#" regex-filter="\.(exe|msi|dmg|bin|iso|deb|rpm|sig)($|\?)">binaries</a> |
       <a href="#" regex-filter="\.(css|js|html?|json|xml|cgi|php)($|\?)">web</a> |
       <a href="#" regex-filter="\.(jp(e?g|e|2)|gif|png|tiff?|bmp|ico|cr2)($|\?)">images</a> |
-      <a href="#" regex-filter="\.(mkv|mpeg|ra?m|avi|mp(g|e|4)|mov|divx|asf|qt|wmv|m\dv|rv|vob|asx|ogm|ogv|webm|flv)($|\?)">videos</a> |
+      <a href="#" regex-filter="\.(mkv|mpeg|ra?m|avi|mp(g|e|4)|mov|divx|asf|qt|wmv|m\dv|rv|vob|asx|ogm|ogv|webm|flv|f4m)($|\?)">videos</a> |
       <a href="#" regex-filter="\.(mp3|wav|ogg|oga|m4a|flac|midi?|rm|aac|wma|mka|ape)($|\?)">audio</a> |
       <a href="#" regex-filter="\.(pdf|odt|ods|odp|odb|odg|odf|rtf|docx?|xlsx?|pptx?)($|\?)">documents</a>
     </p>
