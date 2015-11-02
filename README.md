@@ -18,7 +18,7 @@ Icon from: http://www.iconarchive.com/show/100-flat-icons-by-graphicloads/downlo
 
 [![RSS](https://stefansundin.github.io/img/feed.png) Release feed](https://github.com/stefansundin/chrome-download-panel/releases.atom)
 
-**v0.0.4** - unreleased - [diff](https://github.com/stefansundin/chrome-download-panel/compare/v0.0.3...master):
+**v0.0.4** - 2015-11-01 - [diff](https://github.com/stefansundin/chrome-download-panel/compare/v0.0.3...v0.0.4):
 - Fix "undefined" in grab-inspected-links link text.
 - You can now end the filename field with `/` and the extension will automatically try to extract a filename from the url.
 - If you leave out the file extension in the filename field, it will be extracted from the url if possible.
