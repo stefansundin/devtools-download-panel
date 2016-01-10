@@ -8,6 +8,9 @@ input[type=search] {
 input[pattern]:invalid {
   color: red;
 }
+input.downloaded {
+  color: green;
+}
 label {
   user-select: none;
   -webkit-user-select: none;
@@ -26,12 +29,27 @@ ul {
   padding: 0 17px;
 }
 li {
+  list-style-type: square;
   white-space: nowrap;
+}
+li.new {
+  list-style-type: circle;
+  color: red;
+}
+li.downloaded {
+  list-style-type: disc;
+  color: green;
+}
+li span {
+  color: black;
 }
 a {
   color: blue;
   cursor: pointer;
   text-decoration: none;
+}
+a:hover, a.hover {
+  color: red;
 }
 a[disabled] {
   color: black;

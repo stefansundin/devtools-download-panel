@@ -21,7 +21,7 @@
 
     <p><b>Special</b>:
       <a href="#" action="grab-all-links" title="grab urls from all page links">grab all links</a> |
-      <a href="#" action="grab-inspected-links" title="grab urls from links inside inspected element (use magnifying glass in devtools navbar or select element in Elements tab)" disabled>grab links from inspected element</a> |
+      <a href="#" action="grab-inspected-links" title="grab urls from links inside inspected element (use inspect icon in devtools navbar or select element in Elements tab)" disabled>grab links from inspected element</a> |
       <a href="#" action="grab-resources" title="grab loaded resources (e.g. html, css, js and image files)">grab resources</a>
     </p>
 
@@ -32,13 +32,14 @@
       <a href="#" regex-filter="\.(exe|msi|dmg|bin|iso|deb|rpm|sig)($|\?)">binaries</a> |
       <a href="#" regex-filter="\.(css|js|html?|json|xml|cgi|php)($|\?)">web</a> |
       <a href="#" regex-filter="\.(jp(e?g|e|2)|gif|png|tiff?|bmp|ico|cr2)($|\?)">images</a> |
-      <a href="#" regex-filter="\.(mkv|mpeg|ra?m|avi|mp(g|e|4)|mov|divx|asf|qt|wmv|m\dv|rv|vob|asx|ogm|ogv|webm|flv|f4m)($|\?)">videos</a> |
+      <a href="#" regex-filter="\.(mkv|mpeg|ra?m|avi|mp(g|e|4)|mov|divx|asf|qt|wmv|m\dv|rv|vob|asx|ogm|ogv|webm|flv|f4m|ts|m3u8)($|\?)">videos</a> |
       <a href="#" regex-filter="\.(mp3|wav|ogg|oga|m4a|flac|midi?|rm|aac|wma|mka|ape)($|\?)">audio</a> |
       <a href="#" regex-filter="\.(pdf|odt|ods|odp|odb|odg|odf|rtf|docx?|xlsx?|pptx?)($|\?)">documents</a>
     </p>
     <p><input type="search" id="network_regex" list="regex_examples" placeholder="\.mp4$"></p>
 
     <p><label><input type="checkbox" id="network_minsize_checkbox"> Minimum size:</label> <input type="search" id="network_minsize" title="k, m and g are supported suffixes" value="1m"></p>
+    <p><label><input type="checkbox" id="network_autodownload_checkbox" title="Download will automatically start when a new network request is captured (filters apply)"> Automatically start downloads</label></p>
     <p><label><input type="checkbox" id="network_autoclear_checkbox"> Clear list on navigation</label></p>
 
     <p>

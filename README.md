@@ -14,9 +14,20 @@ Icon from: http://www.iconarchive.com/show/100-flat-icons-by-graphicloads/downlo
 ![RSS](screenshot.png)
 
 
+# Tips
+- End filename with `/` to automatically append filename from url.
+- Middle-click `[download]` link to open save-as dialog.
+- Middle-click url to open link url in new tab.
+
+
 # Changelog
 
 [![RSS](https://stefansundin.github.io/img/feed.png) Release feed](https://github.com/stefansundin/chrome-download-panel/releases.atom)
+
+**v0.0.5** - unreleased - [diff](https://github.com/stefansundin/chrome-download-panel/compare/v0.0.4...master):
+- Add indicators if url has been downloaded already.
+- Add checkbox to automatically start downloads.
+- No longer clear url and filename fields when download starts.
 
 **v0.0.4** - 2015-11-01 - [diff](https://github.com/stefansundin/chrome-download-panel/compare/v0.0.3...v0.0.4):
 - Fix "undefined" in grab-inspected-links link text.

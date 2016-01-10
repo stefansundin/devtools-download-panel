@@ -13,11 +13,11 @@ function fmt_filesize(bytes) {
 }
 
 function extract_filename(url) {
-  var filename = url.substr(url.lastIndexOf('/')+1);
-  var i = filename.indexOf('?');
+  var i = url.indexOf('?');
   if (i != -1) {
-    filename = filename.substr(0, i);
+    url = url.substr(0, i);
   }
+  var filename = url.substr(url.lastIndexOf('/')+1);
   return filename;
 }
 
@@ -140,11 +140,13 @@ window.addEventListener('load', function() {
     var a = document.createElement('a');
     a.appendChild(document.createTextNode(opts.url));
     a.href = opts.url;
+    a.title = opts.filename ? opts.filename : extract_filename(opts.url);
     a.addEventListener('click', function(e) {
       // allow middle click to open link in new window
       if (e.which == 1) {
         e.preventDefault();
         url_input.value = opts.url;
+        url_update();
         filename_input.value = (opts.filename ? opts.filename : '');
         setTimeout(function() {
           filename_input.focus();
@@ -153,9 +155,7 @@ window.addEventListener('load', function() {
     });
     li.appendChild(a);
     history_list.appendChild(li);
-
-    filename_input.value = url_input.value = '';
-    url_input.focus();
+    url_update();
   }
 
   function download() {
@@ -176,8 +176,21 @@ window.addEventListener('load', function() {
   function keyup(e) {
     if (e.keyCode == 13) {
       download();
+      // url_update();
     }
   }
+
+  function url_update() {
+    if (history.indexOf(url_input.value) !== -1) {
+      url_input.className = 'downloaded';
+    }
+    else {
+      url_input.className = '';
+    }
+  }
+
+  url_input.addEventListener('input', url_update);
+  url_input.addEventListener('focus', url_update);
 
   url_input.addEventListener('keyup', keyup);
   filename_input.addEventListener('keyup', keyup);
@@ -203,6 +216,7 @@ window.addEventListener('load', function() {
           url_input.value = '';
         }
       }
+      url_update();
     }
     else if (filename_input.value == '') {
       filename_input.focus();
@@ -213,6 +227,7 @@ window.addEventListener('load', function() {
   var network_regex_input = document.getElementById('network_regex');
   var network_minsize_checkbox = document.getElementById('network_minsize_checkbox');
   var network_minsize_input = document.getElementById('network_minsize');
+  var network_autodownload_checkbox = document.getElementById('network_autodownload_checkbox');
   var network_autoclear_checkbox = document.getElementById('network_autoclear_checkbox');
   var network_list = document.getElementById('network');
   var network_stats = document.getElementById('network_stats');
@@ -263,27 +278,47 @@ window.addEventListener('load', function() {
     }
   }
 
-  function add_network_entry(entry) {
+  function add_network_entry(entry, className) {
+    var filename = extract_filename(entry.request.url);
     var li = document.createElement('li');
+    var span = document.createElement('span');
+    var url_link = document.createElement('a');
+    li.appendChild(span);
+    if (history.indexOf(entry.request.url) !== -1) {
+      li.className = 'downloaded';
+    }
+    else if (typeof(className) == 'string' && className) {
+      li.className = className;
+    }
 
     // instant download link
-    li.appendChild(document.createTextNode('['));
-    var a = document.createElement('a');
-    a.title = 'Instant download';
-    a.appendChild(document.createTextNode('download'));
-    a.addEventListener('click', function(e) {
+    span.appendChild(document.createTextNode('['));
+    var instant_link = document.createElement('a');
+    instant_link.href = '#'; // needed for middle click
+    instant_link.title = 'Instantly download '+filename;
+    instant_link.appendChild(document.createTextNode('download'));
+    // highlight url when hovering instant download link
+    instant_link.addEventListener('mouseenter', function(e) {
+      url_link.className = 'hover';
+    });
+    instant_link.addEventListener('mouseleave', function(e) {
+      url_link.className = '';
+    });
+    instant_link.addEventListener('click', function(e) {
+      e.preventDefault();
       // middle click uses saveAs
       start_download({
         url: entry.request.url,
         saveAs: e.which == 2
       });
+      li.className = 'downloaded';
     });
-    li.appendChild(a);
-    li.appendChild(document.createTextNode('] '));
+    span.appendChild(instant_link);
+    span.appendChild(document.createTextNode('] '));
 
     // preview
     if (entry.content) {
-      li.appendChild(document.createTextNode('['));
+      span.appendChild(document.createTextNode('['));
       var a = document.createElement('a');
       a.appendChild(document.createTextNode('preview'));
       var img = document.createElement('img');
@@ -297,30 +332,32 @@ window.addEventListener('load', function() {
       a.addEventListener('mouseout', function(e) {
         document.body.removeChild(img);
       });
-      li.appendChild(a);
-      li.appendChild(document.createTextNode('] '));
+      span.appendChild(a);
+      span.appendChild(document.createTextNode('] '));
     }
 
     // link to populate form
-    var a = document.createElement('a');
-    a.appendChild(document.createTextNode(entry.request.url));
-    a.href = entry.request.url;
-    a.addEventListener('click', function(e) {
+    url_link.appendChild(document.createTextNode(entry.request.url));
+    url_link.href = entry.request.url;
+    url_link.addEventListener('click', function(e) {
       // allow middle click to open link in new window
       if (e.which == 1) {
         e.preventDefault();
         url_input.value = entry.request.url;
+        url_update();
         setTimeout(function() {
           filename_input.focus();
         }, 100);
       }
     });
-    li.appendChild(a);
-    // li.title = entry.request.url;
+    span.appendChild(url_link);
+    span.title = filename;
+
     var size = entry.response.content.size;
     if (size >= 0) {
-      li.appendChild(document.createTextNode(' ('+fmt_filesize(size)+')'));
-      li.title += ' ('+fmt_filesize(size)+')';
+      span.appendChild(document.createTextNode(' ('+fmt_filesize(size)+')'));
+      instant_link.title += ' ('+fmt_filesize(size)+')';
+      span.title += ' ('+fmt_filesize(size)+')';
     }
     network_list.appendChild(li);
   }
@@ -397,6 +434,7 @@ window.addEventListener('load', function() {
     // autograb url if filtering only matches one
     if (url_input.value == '' && entries.length == 1) {
       url_input.value = entries[0].request.url;
+      url_update();
     }
   }
 
@@ -540,7 +578,10 @@ return urls;\
       if (valid_request(har_entry)) {
         network_entries.push(har_entry);
         if (filter_request(har_entry)) {
-          add_network_entry(har_entry);
+          if (network_autodownload_checkbox.checked) {
+            start_download({ url: har_entry.request.url });
+          }
+          add_network_entry(har_entry, 'new');
         }
         update_request_stats();
       }
