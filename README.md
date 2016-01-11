@@ -24,9 +24,10 @@ Icon from: http://www.iconarchive.com/show/100-flat-icons-by-graphicloads/downlo
 
 [![RSS](https://stefansundin.github.io/img/feed.png) Release feed](https://github.com/stefansundin/chrome-download-panel/releases.atom)
 
-**v0.0.5** - unreleased - [diff](https://github.com/stefansundin/chrome-download-panel/compare/v0.0.4...master):
+**v0.0.5** - 2016-01-10 - [diff](https://github.com/stefansundin/chrome-download-panel/compare/v0.0.4...v0.0.5):
 - Add indicators if url has been downloaded already.
 - Add checkbox to automatically start downloads.
+- Add option to reverse lists.
 - No longer clear url and filename fields when download starts.
 
 **v0.0.4** - 2015-11-01 - [diff](https://github.com/stefansundin/chrome-download-panel/compare/v0.0.3...v0.0.4):

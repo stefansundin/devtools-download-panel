@@ -10,14 +10,19 @@
     "256": "img/icon256.png"
   },
   "background": {
-      "scripts": [ "background.js" ]
+    "scripts": [ "background.js" ]
   },
   "devtools_page": "devtools.html",
+  "options_ui": {
+    "page": "options.html",
+    "chrome_style": true
+  },
   "permissions": [
     "tabs",
     "downloads",
-    "clipboardRead"
+    "clipboardRead",
+    "storage"
   ],
-  "minimum_chrome_version": "31",
+  "minimum_chrome_version": "42",
   "manifest_version": 2
 }

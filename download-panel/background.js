@@ -1,9 +1,15 @@
 // We can't initiate downloads from the devtools panel, so pass a message to this background script which initiates the download... Doh!
 
-var platform;
+var platform, options;
 
 chrome.runtime.getPlatformInfo(function(info) {
   platform = info;
+});
+
+chrome.storage.sync.get({
+  reverse_list: false
+}, function(items) {
+  options = items;
 });
 
 chrome.runtime.onMessage.addListener(
@@ -20,6 +26,15 @@ chrome.runtime.onMessage.addListener(
     }
     else if (message.action == 'get-platform') {
       sendResponse({ platform: platform });
+    }
+    else if (message.action == 'open-options') {
+      chrome.runtime.openOptionsPage();
+    }
+    else if (message.action == 'get-options') {
+      sendResponse(options);
+    }
+    else if (message.action == 'update-options') {
+      options = message.options;
     }
   }
 );

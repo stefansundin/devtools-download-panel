@@ -1,4 +1,3 @@
-
 // We have to use a lot of setTimeout in click handlers unfortunately, otherwise it will cause another click if the content scrolls up due to what happens in the handler.
 
 function fmt_filesize(bytes) {
@@ -55,6 +54,13 @@ function debug(t) {
 window.addEventListener('load', function() {
   var history = [];
 
+  var options = {
+    reverse_list: false
+  };
+  chrome.runtime.sendMessage({ action: 'get-options' }, function(items) {
+    options = items;
+  });
+
   var version = chrome.runtime.getManifest().version;
   var version_span = document.getElementById('version');
   version_span.appendChild(document.createTextNode('v'+version));
@@ -75,7 +81,6 @@ window.addEventListener('load', function() {
       }
     }
   });
-
 
   var url_input = document.getElementById('url');
   var filename_input = document.getElementById('filename');
@@ -154,7 +159,12 @@ window.addEventListener('load', function() {
       }
     });
     li.appendChild(a);
-    history_list.appendChild(li);
+    if (options.reverse_list) {
+      history_list.insertBefore(li, history_list.firstChild);
+    }
+    else {
+      history_list.appendChild(li);
+    }
     url_update();
   }
 
@@ -359,7 +369,12 @@ window.addEventListener('load', function() {
       instant_link.title += ' ('+fmt_filesize(size)+')';
       span.title += ' ('+fmt_filesize(size)+')';
     }
-    network_list.appendChild(li);
+    if (options.reverse_list) {
+      network_list.insertBefore(li, network_list.firstChild);
+    }
+    else {
+      network_list.appendChild(li);
+    }
   }
 
   function valid_request(entry) {
@@ -546,6 +561,9 @@ return urls;\
     },
     'open-downloads-folder': function(e) {
       chrome.runtime.sendMessage({ action: 'open-downloads-folder' });
+    },
+    'open-options': function(e) {
+      chrome.runtime.sendMessage({ action: 'open-options' });
     },
   };
 
