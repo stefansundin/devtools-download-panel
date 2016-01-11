@@ -24,7 +24,7 @@ Icon from: http://www.iconarchive.com/show/100-flat-icons-by-graphicloads/downlo
 
 [![RSS](https://stefansundin.github.io/img/feed.png) Release feed](https://github.com/stefansundin/chrome-download-panel/releases.atom)
 
-**v0.0.5** - 2016-01-10 - [diff](https://github.com/stefansundin/chrome-download-panel/compare/v0.0.4...v0.0.5):
+**v0.1.0** - 2016-01-10 - [diff](https://github.com/stefansundin/chrome-download-panel/compare/v0.0.4...v0.1.0):
 - Add indicators if url has been downloaded already.
 - Add checkbox to automatically start downloads.
 - Add option to reverse lists.
