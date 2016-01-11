@@ -2,6 +2,8 @@
   "name": "Download panel",
   "version": "0.1.0",
   "description": "Adds a download panel to the Developer Tools.",
+  "homepage_url": "https://github.com/stefansundin/chrome-download-panel",
+  "author": "Stefan Sundin",
   "icons": {
     "16": "img/icon16.png",
     "32": "img/icon32.png",
