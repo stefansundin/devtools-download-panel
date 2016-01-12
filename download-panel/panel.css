@@ -2,7 +2,7 @@ body {
   padding-bottom: 30px;
 }
 input[type=search] {
-  width: 90%;
+  width: 100%;
   font-family: Courier New;
 }
 input[pattern]:invalid {
@@ -11,6 +11,26 @@ input[pattern]:invalid {
 input.downloaded {
   color: green;
 }
+.right-addon {
+  position: relative;
+}
+.right-addon a {
+  position: absolute;
+  right: 0px;
+  padding: 1px 6px;
+  margin: 2px;
+  max-width: 250px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: lightgrey;
+  border-radius: 3px;
+}
+.right-addon a:empty,
+.right-addon.focus a {
+  display: none;
+}
+
 label {
   user-select: none;
   -webkit-user-select: none;

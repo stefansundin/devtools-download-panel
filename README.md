@@ -15,14 +15,19 @@ Icon from: http://www.iconarchive.com/show/100-flat-icons-by-graphicloads/downlo
 
 
 # Tips
+- If you have an url copied when opening the download panel, it will be pasted to the url field automatically.
 - End filename with `/` to automatically append filename from url.
 - Middle-click `[download]` link to open save-as dialog.
 - Middle-click url to open link url in new tab.
+- Inspect an element and a badge will appear in the filename text field. Click it to use the text contents as your filename.
 
 
 # Changelog
 
 [![RSS](https://stefansundin.github.io/img/feed.png) Release feed](https://github.com/stefansundin/chrome-download-panel/releases.atom)
+
+**v0.1.1** - unreleased - [diff](https://github.com/stefansundin/chrome-download-panel/compare/v0.1.0...v0.1.1):
+- Inspect an element and a badge will appear in the filename text field. Click it to use the text contents as your filename.
 
 **v0.1.0** - 2016-01-10 - [diff](https://github.com/stefansundin/chrome-download-panel/compare/v0.0.4...v0.1.0):
 - Add indicators if url has been downloaded already.

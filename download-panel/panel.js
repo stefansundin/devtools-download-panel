@@ -202,6 +202,13 @@ window.addEventListener('load', function() {
   url_input.addEventListener('input', url_update);
   url_input.addEventListener('focus', url_update);
 
+  filename_input.addEventListener('focus', function() {
+    this.parentNode.className = 'right-addon focus';
+  });
+  filename_input.addEventListener('blur', function() {
+    this.parentNode.className = 'right-addon';
+  });
+
   url_input.addEventListener('keyup', keyup);
   filename_input.addEventListener('keyup', keyup);
   download_button.addEventListener('click', download);
@@ -513,6 +520,10 @@ for (var i=0; i < links.length; i++) {\
 return urls;\
 })()", populate_urls);
     },
+    'use-inspected-text': function(e) {
+      filename_input.value = this.title;
+      filename_input.focus();
+    },
     'grab-resources': function(e) {
       chrome.devtools.inspectedWindow.getResources(function(resources) {
         // we're faking HAR entries here, we'll see if this holds up in the future
@@ -572,7 +583,7 @@ return urls;\
     var link = links[i];
     link.addEventListener('click', function(e) {
       e.preventDefault();
-      actions[this.getAttribute('action')](e);
+      actions[this.getAttribute('action')].call(this, e);
     });
   }
 
@@ -628,6 +639,24 @@ return urls;\
         else {
           link.removeAttribute('disabled');
           link.appendChild(document.createTextNode(' ('+count+' links)'));
+        }
+      });
+      chrome.devtools.inspectedWindow.eval("(function(){ if ($0 !== undefined) { return $0.textContent; } })()", function(text, e) {
+        if (e) {
+          debug('e: '+e.isError+', '+e.code+', '+e.description+', '+e.details+', '+e.isException+', '+e.value);
+        }
+        var link = document.querySelectorAll('[action="use-inspected-text"]')[0];
+        while (link.firstChild) {
+          link.removeChild(link.firstChild);
+        }
+        // text is undefined if there is no element selected, this happens when the user navigates to another page
+        if (text === undefined) {
+          text = '';
+        }
+        text = text.replace(/[:*?"<>|\r\n]/g, '').replace(/[\t ]+/g, ' ').trim();
+        if (text != '') {
+          link.title = text;
+          link.appendChild(document.createTextNode(text.substr(0,50)));
         }
       });
     });
