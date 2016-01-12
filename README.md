@@ -28,6 +28,7 @@ Icon from: http://www.iconarchive.com/show/100-flat-icons-by-graphicloads/downlo
 
 **v0.1.1** - unreleased - [diff](https://github.com/stefansundin/chrome-download-panel/compare/v0.1.0...v0.1.1):
 - Inspect an element and a badge will appear in the filename text field. Click it to use the text contents as your filename.
+- Check inspected element on startup.
 
 **v0.1.0** - 2016-01-10 - [diff](https://github.com/stefansundin/chrome-download-panel/compare/v0.0.4...v0.1.0):
 - Add indicators if url has been downloaded already.

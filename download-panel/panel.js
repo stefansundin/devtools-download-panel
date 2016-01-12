@@ -623,7 +623,7 @@ return urls;\
       }
     });
 
-    chrome.devtools.panels.elements.onSelectionChanged.addListener(function() {
+    function check_inspected_element() {
       chrome.devtools.inspectedWindow.eval("(function(){ if ($0 !== undefined) { return $0.getElementsByTagName('a').length; } })()", function(count, e) {
         if (e) {
           debug('e: '+e.isError+', '+e.code+', '+e.description+', '+e.details+', '+e.isException+', '+e.value);
@@ -659,7 +659,8 @@ return urls;\
           link.appendChild(document.createTextNode(text.substr(0,50)));
         }
       });
-    });
+    }
+    chrome.devtools.panels.elements.onSelectionChanged.addListener(check_inspected_element);
+    check_inspected_element();
   }
-
 });
