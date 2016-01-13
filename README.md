@@ -26,7 +26,7 @@ Icon from: http://www.iconarchive.com/show/100-flat-icons-by-graphicloads/downlo
 
 [![RSS](https://stefansundin.github.io/img/feed.png) Release feed](https://github.com/stefansundin/chrome-download-panel/releases.atom)
 
-**v0.1.1** - unreleased - [diff](https://github.com/stefansundin/chrome-download-panel/compare/v0.1.0...v0.1.1):
+**v0.1.1** - 2016-01-12 - [diff](https://github.com/stefansundin/chrome-download-panel/compare/v0.1.0...v0.1.1):
 - Inspect an element and a badge will appear in the filename text field. Click it to use the text contents as your filename.
 - Check inspected element on startup.
 
