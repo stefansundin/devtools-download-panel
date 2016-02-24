@@ -27,6 +27,9 @@ chrome.runtime.onMessage.addListener(
     else if (message.action == 'get-platform') {
       sendResponse({ platform: platform });
     }
+    else if (message.action == 'get-lang') {
+      sendResponse(chrome.i18n.getUILanguage());
+    }
     else if (message.action == 'open-options') {
       chrome.runtime.openOptionsPage();
     }

@@ -594,6 +594,19 @@ return urls;\
     }
   });
 
+  chrome.runtime.sendMessage({ action: 'get-lang' }, function(lang) {
+    var links = document.querySelectorAll('a[href="chrome://settings/search#download%20location"]');
+    var map = {
+      'sv': 'nedladdningsplats'
+    };
+    if (map[lang]) {
+      var url = 'chrome://settings/search#'+encodeURIComponent(map[lang]);
+      for (var i=0; i < links.length; i++) {
+        links[i].href = links[i].title = url;
+      }
+    }
+  });
+
   // Only try to use chrome.devtools.* APIs if we're a devtools page (opening the chrome-extension url in its own tab will cause Aw Snap)
   if (window.top != window) {
     document.body.setAttribute('devtools', '');
