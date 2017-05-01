@@ -59,10 +59,12 @@ window.addEventListener('load', function() {
   var history = [];
 
   var options = {
-    reverse_list: false
+    reverse_list: false,
+    hide_data: false,
   };
   chrome.runtime.sendMessage({ action: 'get-options' }, function(items) {
     options = items;
+    network_hidedata_checkbox.checked = options.hide_data;
   });
 
   var version = chrome.runtime.getManifest().version;
@@ -258,6 +260,7 @@ window.addEventListener('load', function() {
   var network_visible_entries = [];
   var network_regex_input = document.getElementById('network_regex');
   var network_minsize_checkbox = document.getElementById('network_minsize_checkbox');
+  var network_hidedata_checkbox = document.getElementById('network_hidedata_checkbox');
   var network_minsize_input = document.getElementById('network_minsize');
   var network_autodownload_checkbox = document.getElementById('network_autodownload_checkbox');
   var network_autoclear_checkbox = document.getElementById('network_autoclear_checkbox');
@@ -267,6 +270,7 @@ window.addEventListener('load', function() {
     network_minsize_input.className = this.checked ? 'enabled' : '';
     filter_network_list();
   });
+  network_hidedata_checkbox.addEventListener('change', filter_network_list);
 
   function minsize_change(e) {
     if (!network_minsize_checkbox.checked) {
@@ -438,6 +442,9 @@ window.addEventListener('load', function() {
         return false;
       }
     }
+    if (network_hidedata_checkbox.checked && entry.request.url.startsWith('data:')) {
+      return false;
+    }
     if (network_regex_input.value != '') {
       var re = new RegExp(network_regex_input.value, 'i');
       if (!re.test(entry.request.url)) {
@@ -556,7 +563,7 @@ return urls;\
           if (valid_request(entry)) {
             if (resource.type == 'image') {
               resource.getContent(function(content, encoding) {
-                entry.content = { encoding: encoding, data:content };
+                entry.content = { encoding: encoding, data: content };
                 network_entries.push(entry);
                 filter_network_list();
               });
