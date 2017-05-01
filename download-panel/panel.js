@@ -139,6 +139,16 @@ window.addEventListener('load', function() {
       opts: opts
     });
 
+    // mark in network list as downloaded
+    var i = network_visible_entries.findIndex(function(entry) {
+      return (entry.request.url == opts.url);
+    });
+    if (i != -1) {
+      var li = network_list.getElementsByTagName('li')[i];
+      li.classList.add('downloaded');
+    }
+
+    // add to history
     document.body.setAttribute('history', '');
     history.push(opts.url);
     var li = document.createElement('li');
@@ -241,6 +251,7 @@ window.addEventListener('load', function() {
   // });
 
   var network_entries = [];
+  var network_visible_entries = [];
   var network_regex_input = document.getElementById('network_regex');
   var network_minsize_checkbox = document.getElementById('network_minsize_checkbox');
   var network_minsize_input = document.getElementById('network_minsize');
@@ -290,12 +301,14 @@ window.addEventListener('load', function() {
   }
 
   function clear_network_list() {
+    network_visible_entries = [];
     while (network_list.hasChildNodes()) {
       network_list.removeChild(network_list.firstChild);
     }
   }
 
   function add_network_entry(entry, className) {
+    network_visible_entries.push(entry);
     var filename = extract_filename(entry.request.url);
     var li = document.createElement('li');
     var span = document.createElement('span');
@@ -328,7 +341,6 @@ window.addEventListener('load', function() {
         url: entry.request.url,
         saveAs: e.which == 2
       });
-      li.className = 'downloaded';
     });
     span.appendChild(instant_link);
     span.appendChild(document.createTextNode('] '));
@@ -555,7 +567,7 @@ return urls;\
     },
     'download-all': function(e) {
       var filename = filename_input.value; // Save this value because the input field will be cleared after the first call
-      network_entries.filter(filter_request).forEach(
+      network_visible_entries.forEach(
         function(entry) {
           start_download({
             url: entry.request.url,
