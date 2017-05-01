@@ -21,14 +21,18 @@ function extract_filename(url) {
 }
 
 function extract_extension(url) {
-  var filename = extract_filename(url);
-  var i = filename.lastIndexOf('.');
-  if (i != -1) {
-    return filename.substr(i+1);
+  var re = /^data:[a-z]+\/([a-z]+)[,;]/.exec(url);
+  if (re) {
+    return re[1];
   }
   else {
-    return '';
+    var filename = extract_filename(url);
+    var i = filename.lastIndexOf('.');
+    if (i != -1) {
+      return filename.substr(i+1);
+    }
   }
+  return '';
 }
 
 function debug(t) {
