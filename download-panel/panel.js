@@ -210,22 +210,17 @@ window.addEventListener('load', function() {
   }
 
   function url_update() {
-    if (history.indexOf(url_input.value) !== -1) {
-      url_input.className = 'downloaded';
-    }
-    else {
-      url_input.className = '';
-    }
+    url_input.classList.toggle('downloaded', history.indexOf(url_input.value) != -1);
   }
 
   url_input.addEventListener('input', url_update);
   url_input.addEventListener('focus', url_update);
 
   filename_input.addEventListener('focus', function() {
-    this.parentNode.className = 'right-addon focus';
+    this.parentNode.classList.add('focus');
   });
   filename_input.addEventListener('blur', function() {
-    this.parentNode.className = 'right-addon';
+    this.parentNode.classList.remove('focus');
   });
 
   url_input.addEventListener('keyup', keyup);
@@ -270,7 +265,7 @@ window.addEventListener('load', function() {
   var network_list = document.getElementById('network');
   var network_stats = document.getElementById('network_stats');
   network_minsize_checkbox.addEventListener('change', function() {
-    network_minsize_input.className = this.checked ? 'enabled' : '';
+    network_minsize_input.classList.toggle('enabled', this.checked);
     filter_network_list();
   });
   network_hidedata_checkbox.addEventListener('change', filter_network_list);
@@ -279,14 +274,14 @@ window.addEventListener('load', function() {
     if (!network_minsize_checkbox.checked) {
       if (this.value != '') {
         network_minsize_checkbox.checked = true;
-        network_minsize_input.className = 'enabled';
+        network_minsize_input.classList.add('enabled');
         filter_network_list();
       }
     }
     else {
       if (this.value == '') {
         network_minsize_checkbox.checked = false;
-        network_minsize_input.className = '';
+        network_minsize_input.classList.remove('enabled');
       }
       filter_network_list();
     }
@@ -318,7 +313,7 @@ window.addEventListener('load', function() {
     }
   }
 
-  function add_network_entry(entry, className) {
+  function add_network_entry(entry, new_entry) {
     network_visible_entries.push(entry);
     var filename = '';
     if (!entry.request.url.startsWith('data:')) {
@@ -329,10 +324,10 @@ window.addEventListener('load', function() {
     var url_link = document.createElement('a');
     li.appendChild(span);
     if (history.indexOf(entry.request.url) !== -1) {
-      li.className = 'downloaded';
+      li.classList.add('downloaded');
     }
-    else if (typeof(className) == 'string' && className) {
-      li.className = className;
+    else if (typeof(new_entry) == 'boolean' && new_entry) {
+      li.classList.add('new');
     }
 
     // instant download link
@@ -343,10 +338,10 @@ window.addEventListener('load', function() {
     instant_link.appendChild(document.createTextNode('download'));
     // highlight url when hovering instant download link
     instant_link.addEventListener('mouseenter', function(e) {
-      url_link.className = 'hover';
+      url_link.classList.add('hover');
     });
     instant_link.addEventListener('mouseleave', function(e) {
-      url_link.className = '';
+      url_link.classList.remove('hover');
     });
     instant_link.addEventListener('click', function(e) {
       e.preventDefault();
@@ -379,7 +374,7 @@ window.addEventListener('load', function() {
 
       var img = document.createElement('img');
       img.src = url;
-      img.className = 'preview';
+      img.classList.add('preview');
       a.addEventListener('mouseover', function(e) {
         // img.style.left = (a.offsetLeft+a.clientWidth+5)+'px';
         img.style.top = (a.offsetTop+a.clientHeight/2-img.height/2)+'px';
@@ -665,7 +660,7 @@ return urls;\
           if (network_autodownload_checkbox.checked) {
             start_download({ url: har_entry.request.url });
           }
-          add_network_entry(har_entry, 'new');
+          add_network_entry(har_entry, true);
         }
         update_request_stats();
       }
