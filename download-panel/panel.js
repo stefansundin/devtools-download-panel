@@ -167,7 +167,7 @@ window.addEventListener('load', function() {
     a.title = opts.filename ? opts.filename : extract_filename(opts.url);
     a.addEventListener('click', function(e) {
       // allow middle click to open link in new window
-      if (e.which == 1) {
+      if (e.which == 1 && !(e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         url_input.value = opts.url;
         url_update();
@@ -353,7 +353,7 @@ window.addEventListener('load', function() {
       // middle click uses saveAs
       start_download({
         url: entry.request.url,
-        saveAs: e.which == 2
+        saveAs: (e.which == 2 || e.metaKey || e.ctrlKey)
       });
     });
     span.appendChild(instant_link);
@@ -396,8 +396,8 @@ window.addEventListener('load', function() {
     url_link.appendChild(document.createTextNode(entry.request.url));
     url_link.href = entry.request.url;
     url_link.addEventListener('click', function(e) {
-      // allow middle click to open link in new window
-      if (e.which == 1) {
+      // allow middle click to open link in new window (or command or ctrl key)
+      if (e.which == 1 && !(e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         url_input.value = entry.request.url;
         url_update();
