@@ -1,9 +1,11 @@
+var version = `v${chrome.runtime.getManifest().version}`
 var default_options = {
   reverse_list: false,
   hide_data: false,
 };
 
 document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('extension_version').textContent = version;
   var reverse_list_input = document.getElementById('reverse_list');
   var hide_data_input = document.getElementById('hide_data');
   var save_button = document.getElementById('save');

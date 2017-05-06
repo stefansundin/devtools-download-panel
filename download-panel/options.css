@@ -24,3 +24,7 @@ p.hidden:hover {
 p.hidden:hover a {
   color: blue;
 }
+
+#extension_version {
+  float: right;
+}
