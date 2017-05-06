@@ -320,7 +320,10 @@ window.addEventListener('load', function() {
 
   function add_network_entry(entry, className) {
     network_visible_entries.push(entry);
-    var filename = extract_filename(entry.request.url);
+    var filename = '';
+    if (!entry.request.url.startsWith('data:')) {
+      filename = extract_filename(entry.request.url);
+    }
     var li = document.createElement('li');
     var span = document.createElement('span');
     var url_link = document.createElement('a');
