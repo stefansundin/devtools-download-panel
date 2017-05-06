@@ -150,6 +150,9 @@ window.addEventListener('load', function() {
       return (entry.request.url == opts.url);
     });
     if (i != -1) {
+      if (options.reverse_list) {
+        i = network_visible_entries.length-1 - i;
+      }
       var li = network_list.getElementsByTagName('li')[i];
       li.classList.add('downloaded');
     }
