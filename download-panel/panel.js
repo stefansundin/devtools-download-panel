@@ -529,6 +529,7 @@ window.addEventListener('load', function() {
           history_list.removeChild(history_list.firstChild);
         }
         document.body.removeAttribute('history');
+        url_update();
       }, 100);
     },
     'clear-network': function(e) {
