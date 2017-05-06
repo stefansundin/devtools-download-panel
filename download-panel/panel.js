@@ -364,8 +364,21 @@ window.addEventListener('load', function() {
       span.appendChild(document.createTextNode('['));
       var a = document.createElement('a');
       a.appendChild(document.createTextNode('preview'));
+
+      var mime = 'image/'+(extract_extension(entry.request.url) || 'png');
+      if (mime == 'image/svg') {
+        mime += '+xml';
+      }
+      var arr = [];
+      var binary = atob(entry.content.data);
+      for (var i=0; i < binary.length; i++) {
+        arr.push(binary.charCodeAt(i));
+      }
+      var blob = new Blob([new Uint8Array(arr)], {type: mime});
+      var url = URL.createObjectURL(blob);
+
       var img = document.createElement('img');
-      img.src = 'data:image/png;'+entry.content.encoding+','+entry.content.data;
+      img.src = url;
       img.className = 'preview';
       a.addEventListener('mouseover', function(e) {
         // img.style.left = (a.offsetLeft+a.clientWidth+5)+'px';
