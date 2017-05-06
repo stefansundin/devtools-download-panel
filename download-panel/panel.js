@@ -355,25 +355,30 @@ window.addEventListener('load', function() {
     span.appendChild(document.createTextNode('] '));
 
     // preview
-    if (entry.content) {
+    if (entry.content || entry.request.url.startsWith('data:image/')) {
       span.appendChild(document.createTextNode('['));
       var a = document.createElement('a');
       a.appendChild(document.createTextNode('preview'));
-
-      var mime = 'image/'+(extract_extension(entry.request.url) || 'png');
-      if (mime == 'image/svg') {
-        mime += '+xml';
-      }
-      var arr = [];
-      var binary = atob(entry.content.data);
-      for (var i=0; i < binary.length; i++) {
-        arr.push(binary.charCodeAt(i));
-      }
-      var blob = new Blob([new Uint8Array(arr)], {type: mime});
-      var url = URL.createObjectURL(blob);
-
       var img = document.createElement('img');
-      img.src = url;
+
+      if (entry.content) {
+        var mime = 'image/'+(extract_extension(entry.request.url) || 'png');
+        if (mime == 'image/svg') {
+          mime += '+xml';
+        }
+        var arr = [];
+        var binary = atob(entry.content.data);
+        for (var i=0; i < binary.length; i++) {
+          arr.push(binary.charCodeAt(i));
+        }
+        var blob = new Blob([new Uint8Array(arr)], {type: mime});
+        var url = URL.createObjectURL(blob);
+        img.src = url;
+      }
+      else {
+        img.src = entry.request.url;
+      }
+
       img.classList.add('preview');
       a.addEventListener('mouseover', function(e) {
         // img.style.left = (a.offsetLeft+a.clientWidth+5)+'px';
