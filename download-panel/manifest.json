@@ -19,6 +19,12 @@
     "page": "options.html",
     "chrome_style": true
   },
+  "browser_action": {
+    "default_icon": {
+      "38": "img/icon38.png"
+    },
+    "default_popup": "options.html"
+  },
   "permissions": [
     "tabs",
     "downloads",
