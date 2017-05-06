@@ -8,7 +8,7 @@ function fmt_filesize(bytes) {
     i++;
   }
   var size = i > 0 ? bytes.toFixed(1) : bytes;
-  return size + ' ' + units[i];
+  return `${size} ${units[i]}`;
 }
 
 function extract_filename(url) {
@@ -69,7 +69,7 @@ window.addEventListener('load', function() {
 
   var version = chrome.runtime.getManifest().version;
   var version_span = document.getElementById('version');
-  version_span.appendChild(document.createTextNode('v'+version));
+  version_span.appendChild(document.createTextNode(`v${version}`));
 
   var scroll_to_top = document.getElementById('scroll-to-top');
   scroll_to_top.addEventListener('click', function(e) {
@@ -334,7 +334,7 @@ window.addEventListener('load', function() {
     span.appendChild(document.createTextNode('['));
     var instant_link = document.createElement('a');
     instant_link.href = '#'; // needed for middle click
-    instant_link.title = 'Instantly download '+filename;
+    instant_link.title = `Instantly download ${filename}`;
     instant_link.appendChild(document.createTextNode('download'));
     // highlight url when hovering instant download link
     instant_link.addEventListener('mouseenter', function(e) {
@@ -411,9 +411,9 @@ window.addEventListener('load', function() {
 
     var size = entry.response.content.size;
     if (size >= 0) {
-      span.appendChild(document.createTextNode(' ('+fmt_filesize(size)+')'));
-      instant_link.title += ' ('+fmt_filesize(size)+')';
-      span.title += ' ('+fmt_filesize(size)+')';
+      span.appendChild(document.createTextNode(` (${fmt_filesize(size)})`));
+      instant_link.title += ` (${fmt_filesize(size)})`;
+      span.title += ` (${fmt_filesize(size)})`;
     }
     if (options.reverse_list) {
       network_list.insertBefore(li, network_list.firstChild);
@@ -480,13 +480,13 @@ window.addEventListener('load', function() {
       network_stats.removeChild(network_stats.firstChild);
     }
     if (shown != total) {
-      network_stats.appendChild(document.createTextNode('Showing '+shown+' / '+total+' urls.'));
+      network_stats.appendChild(document.createTextNode(`Showing ${shown} / ${total} urls.`));
     }
     else if (total == 0) {
       network_stats.appendChild(document.createTextNode('No urls captured.'));
     }
     else {
-      network_stats.appendChild(document.createTextNode('Captured '+shown+' urls.'));
+      network_stats.appendChild(document.createTextNode(`Captured ${shown} urls.`));
     }
   }
 
@@ -682,7 +682,7 @@ return urls;\
     function check_inspected_element() {
       chrome.devtools.inspectedWindow.eval("(function(){ if ($0 !== undefined) { return $0.getElementsByTagName('a').length; } })()", function(count, e) {
         if (e) {
-          debug('e: '+e.isError+', '+e.code+', '+e.description+', '+e.details+', '+e.isException+', '+e.value);
+          debug(`e: ${e.isError}, ${e.code}, ${e.description}, ${e.details}, ${e.isException}, ${e.value}`);
         }
         var link = document.querySelectorAll('[action="grab-inspected-links"]')[0];
         while (link.childNodes.length > 1) {
@@ -694,12 +694,12 @@ return urls;\
         }
         else {
           link.removeAttribute('disabled');
-          link.appendChild(document.createTextNode(' ('+count+' links)'));
+          link.appendChild(document.createTextNode(` (${count} links)`));
         }
       });
       chrome.devtools.inspectedWindow.eval("(function(){ if ($0 !== undefined) { return $0.textContent; } })()", function(text, e) {
         if (e) {
-          debug('e: '+e.isError+', '+e.code+', '+e.description+', '+e.details+', '+e.isException+', '+e.value);
+          debug(`e: ${e.isError}, ${e.code}, ${e.description}, ${e.details}, ${e.isException}, ${e.value}`);
         }
         var link = document.querySelectorAll('[action="use-inspected-text"]')[0];
         while (link.firstChild) {
