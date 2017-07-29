@@ -6,8 +6,16 @@ chrome.runtime.getPlatformInfo(function(info) {
   platform = info;
 });
 
+// chrome.storage.sync.get({
+//   reverse_list: false,
+//   hide_data: false,
+// }).then(function(items) {
+//   options = items;
+// });
+
 chrome.storage.sync.get({
-  reverse_list: false
+  reverse_list: false,
+  hide_data: false,
 }, function(items) {
   options = items;
 });
@@ -34,6 +42,7 @@ chrome.runtime.onMessage.addListener(
       chrome.runtime.openOptionsPage();
     }
     else if (message.action == 'get-options') {
+      console.log(options);
       sendResponse(options);
     }
     else if (message.action == 'update-options') {

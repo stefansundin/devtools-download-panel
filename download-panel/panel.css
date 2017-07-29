@@ -121,6 +121,7 @@ body[history] .history {
 
 
 body.theme-dark {
+  background-color: #1d1d21;
   color: #888f96;
 }
 body.theme-dark a {
