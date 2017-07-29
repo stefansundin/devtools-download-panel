@@ -1,5 +1,6 @@
 body {
   padding-bottom: 30px;
+  /*background-color: white;*/
 }
 input[type=search] {
   width: 100%;
@@ -117,4 +118,26 @@ body[history] .history {
 .history h3 {
   display: inline-block;
   margin-right: 10px;
+}
+
+
+
+
+body.theme-dark {
+  color: #737373;
+}
+body.theme-dark a {
+  color: #bebebe;
+}
+body.theme-dark input[type=search] {
+  background-color: #212021;
+  border: 1px solid #5c5c5c;
+  border-radius: 2px;
+}
+body.theme-dark #scroll-to-top {
+  background-color: #212021;
+  border-color: white;
+}
+body.theme-dark li span {
+  color: #737373;
 }

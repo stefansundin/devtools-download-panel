@@ -63,13 +63,20 @@ window.addEventListener('load', function() {
     hide_data: false,
   };
   chrome.runtime.sendMessage({ action: 'get-options' }, function(items) {
+    console.log(items);
+    debug(items);
     options = items;
-    network_hidedata_checkbox.checked = options.hide_data;
+    // network_hidedata_checkbox.checked = options.hide_data;
   });
 
   var version = chrome.runtime.getManifest().version;
   var version_span = document.getElementById('version');
   version_span.appendChild(document.createTextNode(`v${version}`));
+
+  if (chrome.devtools.panels.themeName) {
+    debug(chrome.devtools.panels.themeName);
+    document.body.classList.add(`theme-${chrome.devtools.panels.themeName}`);
+  }
 
   var scroll_to_top = document.getElementById('scroll-to-top');
   scroll_to_top.addEventListener('click', function(e) {
@@ -630,50 +637,77 @@ return urls;\
     });
   }
 
-  chrome.runtime.sendMessage({ action: 'get-platform' }, function(platform) {
-    var links = document.querySelectorAll('a[href="chrome://downloads"]');
+  var is_firefox = navigator.userAgent.indexOf('Firefox/') != -1;
+  if (is_firefox) {
+    var links = document.querySelectorAll('a[href^="chrome://"]');
     for (var i=0; i < links.length; i++) {
-      links[i].title = platform.os == 'mac' ? '⌘-Shift-J' : 'Ctrl+J';
+      var link = links[i];
+      link.parentNode.removeChild(link.nextSibling);
+      link.parentNode.removeChild(link);
     }
-  });
-
-  chrome.runtime.sendMessage({ action: 'get-lang' }, function(lang) {
-    var links = document.querySelectorAll('a[href="chrome://settings/search#download%20location"]');
-    var map = {
-      'sv': 'nedladdningsplats'
-    };
-    if (map[lang]) {
-      var url = 'chrome://settings/search#'+encodeURIComponent(map[lang]);
+    if (!chrome.devtools.inspectedWindow.getResources) {
+      var link = document.querySelector('[action="grab-resources"]');
+      link.parentNode.removeChild(link.previousSibling);
+      link.parentNode.removeChild(link);
+    }
+  }
+  else {
+    chrome.runtime.sendMessage({ action: 'get-platform' }, function(platform) {
+      var links = document.querySelectorAll('a[href="chrome://downloads"]');
       for (var i=0; i < links.length; i++) {
-        links[i].href = links[i].title = url;
+        links[i].title = platform.os == 'mac' ? '⌘-Shift-J' : 'Ctrl+J';
       }
-    }
-  });
+    });
+  }
+
+  // chrome.runtime.sendMessage({ action: 'get-lang' }, function(lang) {
+  //   var links = document.querySelectorAll('a[href="chrome://settings/search#download%20location"]');
+  //   var map = {
+  //     'sv': 'nedladdningsplats'
+  //   };
+  //   if (map[lang]) {
+  //     var url = 'chrome://settings/search#'+encodeURIComponent(map[lang]);
+  //     for (var i=0; i < links.length; i++) {
+  //       links[i].href = links[i].title = url;
+  //     }
+  //   }
+  // });
 
   // Only try to use chrome.devtools.* APIs if we're a devtools page (opening the chrome-extension url in its own tab will cause Aw Snap)
-  if (window.top != window) {
+  // console.log(window.top);
+  // console.log(window);
+  // console.log(window.top != window);
+  if (window.top != window || is_firefox) {
+    // console.log("hello!!");
+    // setTimeout(function(){
+    //   console.log("hello!!2");
+    // }, 3000);
     document.body.setAttribute('devtools', '');
 
-    chrome.devtools.network.getHAR(function(har_log) {
-      network_entries = network_entries.concat(har_log.entries.filter(valid_request));
-      filter_network_list();
-    });
+    if (chrome.devtools.network.getHAR) {
+      chrome.devtools.network.getHAR(function(har_log) {
+        network_entries = network_entries.concat(har_log.entries.filter(valid_request));
+        filter_network_list();
+      });
+    }
 
-    chrome.devtools.network.onRequestFinished.addListener(function(har_entry) {
-      if (valid_request(har_entry)) {
-        network_entries.push(har_entry);
-        if (filter_request(har_entry)) {
-          if (network_autodownload_checkbox.checked) {
-            start_download({ url: har_entry.request.url });
+    if (chrome.devtools.network.onRequestFinished) {
+      chrome.devtools.network.onRequestFinished.addListener(function(har_entry) {
+        if (valid_request(har_entry)) {
+          network_entries.push(har_entry);
+          if (filter_request(har_entry)) {
+            if (network_autodownload_checkbox.checked) {
+              start_download({ url: har_entry.request.url });
+            }
+            add_network_entry(har_entry, true);
           }
-          add_network_entry(har_entry, true);
+          update_request_stats();
         }
-        update_request_stats();
-      }
-    });
+      });
+    }
 
     chrome.devtools.network.onNavigated.addListener(function(url) {
-      // debug(url);
+      debug(url);
       if (network_autoclear_checkbox.checked) {
         actions['clear-network']();
       }
@@ -716,7 +750,9 @@ return urls;\
         }
       });
     }
-    chrome.devtools.panels.elements.onSelectionChanged.addListener(check_inspected_element);
+    if (chrome.devtools.panels.elements.onSelectionChanged) {
+      chrome.devtools.panels.elements.onSelectionChanged.addListener(check_inspected_element);
+    }
     check_inspected_element();
   }
 });
