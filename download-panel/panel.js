@@ -607,11 +607,13 @@ return urls;\
     'download-all': function(e) {
       var filename = filename_input.value; // Save this value because the input field will be cleared after the first call
       network_visible_entries.forEach(
-        function(entry) {
-          start_download({
-            url: entry.request.url,
-            filename: filename
-          });
+        function(entry, index) {
+          setTimeout(function() {
+            start_download({
+              url: entry.request.url,
+              filename: filename
+            });
+          }, 100*index);
         }
       );
     },
