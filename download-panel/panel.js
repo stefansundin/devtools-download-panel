@@ -120,11 +120,11 @@ window.addEventListener('load', function() {
           return;
         }
       }
-      if (/\/|\\/.test(opts.filename.slice(-1))) {
+      if (["/","\\"].includes(opts.filename.slice(-1))) {
         // Auto-detect filename from url and append it
         var filename = extract_filename(opts.url);
         if (filename == '') {
-          alert("While subdirs are fine, you can't end the filename with a slash or backslash. If a filename could be detected from the url, it would be automatically appended.");
+          alert("While subdirectories are fine, you can't end the filename with a slash or backslash. If a filename could be detected from the url, it would be automatically appended.");
           return;
         }
         else {
@@ -132,7 +132,7 @@ window.addEventListener('load', function() {
         }
       }
       if (extract_extension(opts.filename) == '' && extract_extension(opts.url) != '') {
-        // Automatically use filename from url if there a file extension is missing in the filename field
+        // Automatically use the extension from the url if the filename field is missing a file extension
         opts.filename += '.'+extract_extension(opts.url);
       }
     }
@@ -233,7 +233,7 @@ window.addEventListener('load', function() {
       url_input.focus();
       document.execCommand('paste');
       var text = url_input.value;
-      if (history.indexOf(text) !== -1) {
+      if (history.includes(text)) {
         // don't use the pasted url if we have it in the history
         url_input.value = '';
       }
@@ -323,7 +323,7 @@ window.addEventListener('load', function() {
     var span = document.createElement('span');
     var url_link = document.createElement('a');
     li.appendChild(span);
-    if (history.indexOf(entry.request.url) !== -1) {
+    if (history.includes(entry.request.url)) {
       li.classList.add('downloaded');
     }
     else if (typeof(new_entry) == 'boolean' && new_entry) {
@@ -429,7 +429,7 @@ window.addEventListener('load', function() {
     var url = entry.request.url;
     var prefix = url.substr(0, url.indexOf(':'));
     var skip = ['', 'javascript', 'chrome-extension', 'about', 'extensions'];
-    if (status == 0 || (status >= 300 && status <= 400) || skip.indexOf(prefix) !== -1) {
+    if (status == 0 || (status >= 300 && status <= 400) || skip.includes(prefix)) {
       return false;
     }
     // don't allow duplicate urls
