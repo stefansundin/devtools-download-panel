@@ -22,3 +22,4 @@ Icon from: http://www.iconarchive.com/show/100-flat-icons-by-graphicloads/downlo
 - Middle-click a URL to open it in a new tab.
 - Inspect an element to make a badge appear in the filename text field. Click the badge to use the text contents as your filename.
 - A red circle means that the network entry appeared after you filtered the list. A green circle means you have already downloaded the URL (it is in the history list).
+- If you use a Network filter regular expression that have capture groups, then you can reference those capture groups in the filename field with `$1`, `$2`, `$3`, etc.

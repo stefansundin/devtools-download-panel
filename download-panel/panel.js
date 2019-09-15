@@ -131,6 +131,14 @@ window.addEventListener('load', function() {
           opts.filename += filename;
         }
       }
+      if (network_regex_input.value != '' && opts.filename.includes('$')) {
+        var network_re = new RegExp(network_regex_input.value, 'i');
+        var network_ret = network_re.exec(opts.url);
+        opts.filename = opts.filename.replace(/\$(\d+)/g, function(match, p1) {
+          var n = parseInt(p1, 10);
+          return network_ret[n];
+        });
+      }
       if (extract_extension(opts.filename) == '' && extract_extension(opts.url) != '') {
         // Automatically use the extension from the url if the filename field is missing a file extension
         opts.filename += '.'+extract_extension(opts.url);
