@@ -25,7 +25,7 @@ chrome.runtime.onMessage.addListener(
       chrome.downloads.showDefaultFolder();
     }
     else if (message.action == 'get-platform') {
-      sendResponse({ platform: platform });
+      sendResponse(platform);
     }
     else if (message.action == 'get-lang') {
       sendResponse(chrome.i18n.getUILanguage());
