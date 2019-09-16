@@ -71,6 +71,10 @@ window.addEventListener('load', function() {
   var version_span = document.getElementById('version');
   version_span.appendChild(document.createTextNode(`v${version}`));
 
+  if (chrome.devtools.panels.themeName) {
+    document.body.classList.add(`theme-${chrome.devtools.panels.themeName}`);
+  }
+
   var scroll_to_top = document.getElementById('scroll-to-top');
   scroll_to_top.addEventListener('click', function(e) {
     window.scrollTo(0, 0);

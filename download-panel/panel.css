@@ -118,3 +118,33 @@ body[history] .history {
   display: inline-block;
   margin-right: 10px;
 }
+
+
+body.theme-dark {
+  color: #777777;
+}
+body.theme-dark a {
+  color: #aeb9c4;
+}
+body.theme-dark a[disabled] {
+  color: #777777;
+}
+body.theme-dark input[type=search] {
+  background-color: #212021;
+  color: #cccccc;
+  border: 1px solid #5c5c5c;
+  border-radius: 2px;
+}
+body.theme-dark #network_minsize {
+  color: #777777;
+}
+body.theme-dark #network_minsize.enabled {
+  color: #cccccc;
+}
+body.theme-dark #scroll-to-top {
+  background-color: #212021;
+  border-color: white;
+}
+body.theme-dark li span {
+  color: #777777;
+}
