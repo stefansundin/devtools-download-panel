@@ -121,13 +121,13 @@ body[history] .history {
 
 
 body.theme-dark {
-  color: #777777;
+  color: #888f96;
 }
 body.theme-dark a {
   color: #aeb9c4;
 }
 body.theme-dark a[disabled] {
-  color: #777777;
+  color: #888f96;
 }
 body.theme-dark input[type=search] {
   background-color: #212021;
@@ -136,7 +136,7 @@ body.theme-dark input[type=search] {
   border-radius: 2px;
 }
 body.theme-dark #network_minsize {
-  color: #777777;
+  color: #888f96;
 }
 body.theme-dark #network_minsize.enabled {
   color: #cccccc;
@@ -146,5 +146,5 @@ body.theme-dark #scroll-to-top {
   border-color: white;
 }
 body.theme-dark li span {
-  color: #777777;
+  color: #888f96;
 }

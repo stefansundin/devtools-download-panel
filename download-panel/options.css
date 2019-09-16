@@ -33,13 +33,13 @@ p.hidden:hover a {
 @media all and (prefers-color-scheme: dark) {
   body {
     background: #202123;
-    color: #777777;
+    color: #888f96;
   }
   a {
     color: #aeb9c4;
   }
   a:active {
-    color: #777777;
+    color: #888f96;
   }
   p.hidden {
     color: #202123;
@@ -48,7 +48,7 @@ p.hidden:hover a {
     color: #202123;
   }
   p.hidden:hover {
-    color: #777777;
+    color: #888f96;
   }
   p.hidden:hover a {
     color: #aeb9c4;
