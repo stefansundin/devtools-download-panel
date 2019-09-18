@@ -16,6 +16,10 @@ function extract_filename(url) {
   if (i != -1) {
     url = url.substr(0, i);
   }
+  i = url.indexOf('#');
+  if (i != -1) {
+    url = url.substr(0, i);
+  }
   var filename = url.substr(url.lastIndexOf('/')+1);
   return filename;
 }
