@@ -103,7 +103,11 @@ body[history] .history {
   width: 90px;
   color: lightgray;
 }
-#network_minsize.enabled {
+#link_text {
+  width: 200px;
+  color: lightgray;
+}
+#network_minsize.enabled, #link_text.enabled {
   color: black;
 }
 
@@ -135,10 +139,12 @@ body.theme-dark input[type=search] {
   border: 1px solid #5c5c5c;
   border-radius: 2px;
 }
-body.theme-dark #network_minsize {
+body.theme-dark #network_minsize,
+body.theme-dark #link_text {
   color: #888f96;
 }
-body.theme-dark #network_minsize.enabled {
+body.theme-dark #network_minsize.enabled,
+body.theme-dark #link_text.enabled {
   color: #cccccc;
 }
 body.theme-dark #scroll-to-top {

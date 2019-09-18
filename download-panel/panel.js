@@ -271,6 +271,8 @@ window.addEventListener('load', function() {
   var network_regex_input = document.getElementById('network_regex');
   var network_minsize_checkbox = document.getElementById('network_minsize_checkbox');
   var network_hidedata_checkbox = document.getElementById('network_hidedata_checkbox');
+  var link_text_checkbox = document.getElementById('link_text_checkbox');
+  var link_text_input = document.getElementById('link_text');
   var network_minsize_input = document.getElementById('network_minsize');
   var network_autodownload_checkbox = document.getElementById('network_autodownload_checkbox');
   var network_autoclear_checkbox = document.getElementById('network_autoclear_checkbox');
@@ -281,6 +283,11 @@ window.addEventListener('load', function() {
     filter_network_list();
   });
   network_hidedata_checkbox.addEventListener('change', filter_network_list);
+  link_text_checkbox.addEventListener('change', function() {
+    link_text_input.classList.toggle('enabled', this.checked);
+    filter_network_list();
+  });
+  link_text_input.addEventListener('input', filter_network_list);
 
   function minsize_change(e) {
     if (!network_minsize_checkbox.checked) {
@@ -421,6 +428,10 @@ window.addEventListener('load', function() {
     span.appendChild(url_link);
     span.title = filename;
 
+    if (entry.text) {
+      span.appendChild(document.createTextNode(` (text: ${entry.text})`));
+    }
+
     var size = entry.response.content.size;
     if (size >= 0) {
       span.appendChild(document.createTextNode(` (${fmt_filesize(size)})`));
@@ -476,6 +487,9 @@ window.addEventListener('load', function() {
     if (network_hidedata_checkbox.checked && entry.request.url.startsWith('data:')) {
       return false;
     }
+    if (link_text_checkbox.checked && (!entry.text || !entry.text.toLowerCase().includes(link_text_input.value.toLowerCase()))) {
+      return false;
+    }
     if (network_regex_input.value != '') {
       var re = new RegExp(network_regex_input.value, 'i');
       if (!re.test(entry.request.url)) {
@@ -514,17 +528,20 @@ window.addEventListener('load', function() {
     }
   }
 
-  function populate_urls(urls, isException) {
-    urls.forEach(function(url) {
+  function populate_entries(list, isException) {
+    list.forEach(function(item) {
       var entry = {
         request: {
-          url: url
+          url: item[0]
         },
         response: {
           status: 200,
           content: { size: -1 }
         }
       };
+      if (item[1].trim() != "") {
+        entry.text = item[1].trim();
+      }
       if (valid_request(entry)) {
         network_entries.push(entry);
       }
@@ -554,26 +571,26 @@ window.addEventListener('load', function() {
     },
     'grab-all-links': function(e) {
       chrome.devtools.inspectedWindow.eval("(function(){\
-var urls = [];\
+var list = [];\
 var links = document.getElementsByTagName('a');\
 for (var i=0; i < links.length; i++) {\
-  urls.push(links[i].href);\
+  list.push([links[i].href, links[i].textContent]);\
 }\
-return urls;\
-})()", populate_urls);
+return list;\
+})()", populate_entries);
     },
     'grab-inspected-links': function(e) {
       chrome.devtools.inspectedWindow.eval("(function(){\
-var urls = [];\
+var list = [];\
 if ($0.tagName == 'A') {\
-  urls.push($0.href);\
+  list.push($0.href);\
 }\
 var links = $0.getElementsByTagName('a');\
 for (var i=0; i < links.length; i++) {\
-  urls.push(links[i].href);\
+  list.push([links[i].href, links[i].textContent]);\
 }\
-return urls;\
-})()", populate_urls);
+return list;\
+})()", populate_entries);
     },
     'use-inspected-text': function(e) {
       filename_input.value = this.title;
