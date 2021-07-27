@@ -602,8 +602,9 @@ window.downloadPanelExtensionText = null;\
 let target = null;\
 \
 function stop() {\
-  window.removeEventListener('click', handleClick, true);\
   window.removeEventListener('mouseover', handleMouseOver, true);\
+  window.removeEventListener('scroll', updateTarget, true);\
+  window.removeEventListener('click', handleClick, true);\
   document.body.removeChild(overlay);\
   delete window.downloadPanelExtensionText;\
 }\
