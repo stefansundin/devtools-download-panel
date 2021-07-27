@@ -61,6 +61,7 @@ function debug(t) {
 
 window.addEventListener('load', function() {
   var history = [];
+  var inspect_interval = null;
 
   var options = {
     reverse_list: false,
@@ -98,6 +99,7 @@ window.addEventListener('load', function() {
 
   var url_input = document.getElementById('url');
   var filename_input = document.getElementById('filename');
+  var inspect_button = document.getElementById('inspect');
   var inspected_text_button = document.getElementById('inspected-text');
   var download_button = document.getElementById('download');
   var saveas_button = document.getElementById('saveas');
@@ -576,6 +578,79 @@ for (var i=0; i < links.length; i++) {\
 }\
 return urls;\
 })()", populate_urls);
+    },
+    'inspect': function(e) {
+      if (inspect_interval) {
+        clearInterval(inspect_interval);
+        inspect_interval = null;
+        inspect_button.textContent = 'Inspect';
+        chrome.devtools.inspectedWindow.eval("(function(){ delete window.downloadPanelExtensionText; })()");
+        return;
+      }
+      inspect_button.textContent = 'Stop';
+      chrome.devtools.inspectedWindow.eval("(function(){\
+if (window.downloadPanelExtensionText !== undefined) {\
+  return;\
+}\
+const overlay = document.createElement('div');\
+overlay.style.position = 'fixed';\
+overlay.style.backgroundColor = 'rgba(255, 155, 0, 0.3)';\
+overlay.style.pointerEvents = 'none';\
+overlay.style.zIndex = 10000;\
+document.body.appendChild(overlay);\
+window.downloadPanelExtensionText = null;\
+let target = null;\
+\
+function stop() {\
+  window.removeEventListener('click', handleClick, true);\
+  window.removeEventListener('mouseover', handleMouseOver, true);\
+  document.body.removeChild(overlay);\
+  delete window.downloadPanelExtensionText;\
+}\
+function updateTarget() {\
+  if (window.downloadPanelExtensionText === undefined) {\
+    stop();\
+    return;\
+  }\
+  const rect = target.getBoundingClientRect();\
+  overlay.style.left = rect.left+'px';\
+  overlay.style.top = rect.top+'px';\
+  overlay.style.width = rect.width+'px';\
+  overlay.style.height = rect.height+'px';\
+  window.downloadPanelExtensionText = target.textContent;\
+}\
+function handleMouseOver(e) {\
+  target = e.target;\
+  updateTarget();\
+}\
+function handleClick(e) {\
+  e.preventDefault();\
+  e.stopPropagation();\
+  stop();\
+}\
+\
+window.addEventListener('mouseover', handleMouseOver, true);\
+window.addEventListener('scroll', updateTarget, true);\
+window.addEventListener('click', handleClick, true);\
+})()");
+      inspect_interval = setInterval(function() {
+        chrome.devtools.inspectedWindow.eval("(function(){ return window.downloadPanelExtensionText; })()", function(text, e) {
+          if (e) {
+            debug(`e: ${e.isError}, ${e.code}, ${e.description}, ${e.details}, ${e.isException}, ${e.value}`);
+          }
+          if (text === undefined) {
+            clearInterval(inspect_interval);
+            inspect_interval = null;
+            inspect_button.textContent = 'Inspect';
+            return;
+          }
+          text = text.replace(/[:*?"<>|\r\n]/g, '').replace(/[\t ]+/g, ' ').trim();
+          if (text === filename_input.value) {
+            return;
+          }
+          filename_input.value = text;
+        });
+      }, 100);
     },
     'use-inspected-text': function(e) {
       filename_input.value = this.title;

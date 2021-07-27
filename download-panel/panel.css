@@ -21,7 +21,6 @@ input.downloaded {
 }
 .right-addon a {
   position: absolute;
-  right: 0px;
   padding: 1px 6px;
   margin: 2px;
   max-width: 250px;
@@ -30,6 +29,14 @@ input.downloaded {
   white-space: nowrap;
   background: lightgrey;
   border-radius: 3px;
+}
+#inspect {
+  right: 0;
+  min-width: 44px;
+  text-align: center;
+}
+#inspected-text {
+  right: 60px;
 }
 .right-addon a:empty,
 .right-addon:focus-within a {
