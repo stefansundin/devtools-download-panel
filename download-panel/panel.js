@@ -582,6 +582,9 @@ return urls;\
     'use-inspected-text': function(e) {
       filename_input.value = this.title;
       filename_input.focus();
+      while (this.firstChild) {
+        this.removeChild(this.firstChild);
+      }
     },
     'grab-resources': function(e) {
       chrome.devtools.inspectedWindow.getResources(function(resources) {
@@ -689,7 +692,7 @@ return urls;\
         if (e) {
           debug(`e: ${e.isError}, ${e.code}, ${e.description}, ${e.details}, ${e.isException}, ${e.value}`);
         }
-        var link = document.querySelectorAll('[action="grab-inspected-links"]')[0];
+        var link = document.querySelector('[action="grab-inspected-links"]');
         while (link.childNodes.length > 1) {
           link.removeChild(link.lastChild);
         }
@@ -706,7 +709,7 @@ return urls;\
         if (e) {
           debug(`e: ${e.isError}, ${e.code}, ${e.description}, ${e.details}, ${e.isException}, ${e.value}`);
         }
-        var link = document.querySelectorAll('[action="use-inspected-text"]')[0];
+        var link = document.querySelector('[action="use-inspected-text"]');
         while (link.firstChild) {
           link.removeChild(link.firstChild);
         }

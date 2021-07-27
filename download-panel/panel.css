@@ -3,7 +3,7 @@ body {
 }
 input[type=search] {
   width: 100%;
-  font-family: Courier New;
+  font-family: "Courier New";
 }
 input[type=checkbox] {
   vertical-align: middle;
@@ -38,7 +38,6 @@ input.downloaded {
 
 label {
   user-select: none;
-  -webkit-user-select: none;
 }
 p {
   margin: .4em 0;
@@ -152,4 +151,7 @@ body.theme-dark #scroll-to-top {
 }
 body.theme-dark li span {
   color: #888f96;
+}
+body.theme-dark .right-addon a {
+  color: black;
 }
