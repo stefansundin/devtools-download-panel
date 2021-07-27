@@ -617,10 +617,13 @@ function updateTarget() {\
   overlay.style.top = rect.top+'px';\
   overlay.style.width = rect.width+'px';\
   overlay.style.height = rect.height+'px';\
-  window.downloadPanelExtensionText = target.textContent;\
+  window.downloadPanelExtensionText = (target.textContent || target.value || target.alt)?.trim() || '';\
 }\
 function handleMouseOver(e) {\
   target = e.target;\
+  while (((target.textContent || target.value || target.alt)?.trim() || '') === '') {\
+    target = target.parentNode;\
+  }\
   updateTarget();\
 }\
 function handleClick(e) {\
