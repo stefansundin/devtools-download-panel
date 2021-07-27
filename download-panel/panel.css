@@ -5,6 +5,11 @@ input[type=search] {
   width: 100%;
   font-family: Courier New;
 }
+input[type=checkbox] {
+  vertical-align: middle;
+  position: relative;
+  bottom: .08em;
+}
 input[pattern]:invalid {
   color: red;
 }
