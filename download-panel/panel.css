@@ -32,7 +32,7 @@ input.downloaded {
   border-radius: 3px;
 }
 .right-addon a:empty,
-.right-addon.focus a {
+.right-addon:focus-within a {
   display: none !important;
 }
 

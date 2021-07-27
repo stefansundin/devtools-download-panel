@@ -236,17 +236,9 @@ window.addEventListener('load', function() {
 
   url_input.addEventListener('input', url_update);
   url_input.addEventListener('focus', url_update);
-
-  filename_input.addEventListener('input', inspected_text_change);
-  filename_input.addEventListener('focus', function() {
-    this.parentNode.classList.add('focus');
-  });
-  filename_input.addEventListener('blur', function() {
-    this.parentNode.classList.remove('focus');
-  });
-
   url_input.addEventListener('keyup', keyup);
   filename_input.addEventListener('keyup', keyup);
+  filename_input.addEventListener('input', inspected_text_change);
   download_button.addEventListener('click', download);
   saveas_button.addEventListener('click', saveas);
 
