@@ -33,7 +33,7 @@ input.downloaded {
 }
 .right-addon a:empty,
 .right-addon.focus a {
-  display: none;
+  display: none !important;
 }
 
 label {

@@ -98,6 +98,7 @@ window.addEventListener('load', function() {
 
   var url_input = document.getElementById('url');
   var filename_input = document.getElementById('filename');
+  var inspected_text_button = document.getElementById('inspected-text');
   var download_button = document.getElementById('download');
   var saveas_button = document.getElementById('saveas');
   var history_list = document.getElementById('history');
@@ -225,6 +226,10 @@ window.addEventListener('load', function() {
     }
   }
 
+  function inspected_text_change() {
+    inspected_text_button.style.display = (filename_input.value === inspected_text_button.title) ? 'none' : 'block';
+  }
+
   function url_update() {
     url_input.classList.toggle('downloaded', history.indexOf(url_input.value) != -1);
   }
@@ -232,6 +237,7 @@ window.addEventListener('load', function() {
   url_input.addEventListener('input', url_update);
   url_input.addEventListener('focus', url_update);
 
+  filename_input.addEventListener('input', inspected_text_change);
   filename_input.addEventListener('focus', function() {
     this.parentNode.classList.add('focus');
   });
@@ -582,9 +588,7 @@ return urls;\
     'use-inspected-text': function(e) {
       filename_input.value = this.title;
       filename_input.focus();
-      while (this.firstChild) {
-        this.removeChild(this.firstChild);
-      }
+      inspected_text_change();
     },
     'grab-resources': function(e) {
       chrome.devtools.inspectedWindow.getResources(function(resources) {
@@ -709,9 +713,8 @@ return urls;\
         if (e) {
           debug(`e: ${e.isError}, ${e.code}, ${e.description}, ${e.details}, ${e.isException}, ${e.value}`);
         }
-        var link = document.querySelector('[action="use-inspected-text"]');
-        while (link.firstChild) {
-          link.removeChild(link.firstChild);
+        while (inspected_text_button.firstChild) {
+          inspected_text_button.removeChild(inspected_text_button.firstChild);
         }
         // text is undefined if there is no element selected, this happens when the user navigates to another page
         if (text === undefined) {
@@ -719,8 +722,9 @@ return urls;\
         }
         text = text.replace(/[:*?"<>|\r\n]/g, '').replace(/[\t ]+/g, ' ').trim();
         if (text != '') {
-          link.title = text;
-          link.appendChild(document.createTextNode(text.substr(0,50)));
+          inspected_text_button.title = text;
+          inspected_text_button.appendChild(document.createTextNode(text.substr(0,50)));
+          inspected_text_button.style.display = 'block';
         }
       });
     }
