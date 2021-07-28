@@ -9,6 +9,11 @@ label {
   display: block;
   margin: 1em 0;
 }
+input[type=checkbox] {
+  vertical-align: middle;
+  position: relative;
+  bottom: .08em;
+}
 ul {
   padding: 0 17px;
 }
