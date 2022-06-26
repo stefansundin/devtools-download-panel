@@ -6,7 +6,7 @@ Chrome Web Store: https://chrome.google.com/webstore/detail/download-panel/dfkcg
 
 When this extension fails to do the job, you can try [Chrono Download Manager](https://chrome.google.com/webstore/detail/chrono-download-manager/mciiogijehkdemklbdcbfkefimifhecn). Then file an issue and let me know how I can improve this extension. :)
 
-Icon from: http://www.iconarchive.com/show/100-flat-icons-by-graphicloads/download-3-icon.html
+Icon from: https://iconarchive.com/show/100-flat-icons-by-graphicloads/download-3-icon.html
 
 
 # Screenshot
@@ -23,3 +23,8 @@ Icon from: http://www.iconarchive.com/show/100-flat-icons-by-graphicloads/downlo
 - Use the <kbd>Inspect</kbd> badge in the filename field to easily grab text from the page and use it for the filename.
 - A red circle means that the network entry appeared after you filtered the list. A green circle means you have already downloaded the URL (it is in the history list).
 - If you use a Network filter regular expression that have capture groups, then you can reference those capture groups in the filename field with `$1`, `$2`, `$3`, etc.
+
+# MV3 issues
+
+- https://bugs.chromium.org/p/chromium/issues/detail?id=1173497
+- https://bugs.chromium.org/p/chromium/issues/detail?id=1288041

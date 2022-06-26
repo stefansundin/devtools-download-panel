@@ -1,6 +1,7 @@
 {
+  "manifest_version": 3,
   "name": "Download panel",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Adds a download panel to the Developer Tools.",
   "homepage_url": "https://github.com/stefansundin/chrome-download-panel",
   "author": "Stefan Sundin",
@@ -12,14 +13,13 @@
     "256": "img/icon256.png"
   },
   "background": {
-    "scripts": [ "background.js" ]
+    "service_worker": "sw.js"
   },
   "devtools_page": "devtools.html",
   "options_ui": {
-    "page": "options.html",
-    "chrome_style": true
+    "page": "options.html"
   },
-  "browser_action": {
+  "action": {
     "default_icon": {
       "38": "img/icon38.png"
     },
@@ -30,6 +30,5 @@
     "clipboardRead",
     "storage"
   ],
-  "minimum_chrome_version": "42",
-  "manifest_version": 2
+  "minimum_chrome_version": "96"
 }

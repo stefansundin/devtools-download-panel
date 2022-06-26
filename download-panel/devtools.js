@@ -1,10 +1,3 @@
-chrome.devtools.panels.create(
-  "Download",
-  null,
-  "panel.html",
-  function(panel) {
-    panel.onShown.addListener(function(win) {
-      win.focus();
-    });
-  }
+chrome.devtools.panels.create('Download', null, 'panel.html', panel =>
+  panel.onShown.addListener(win => win.focus()),
 );

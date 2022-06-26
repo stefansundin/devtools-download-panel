@@ -17,23 +17,6 @@ input[type=checkbox] {
 ul {
   padding: 0 17px;
 }
-p.hidden {
-  color: white;
-}
-p.hidden a {
-  color: white;
-}
-p.hidden:hover {
-  color: black;
-}
-p.hidden:hover a {
-  color: blue;
-}
-
-#extension_version {
-  float: right;
-}
-
 
 @media all and (prefers-color-scheme: dark) {
   body {
@@ -45,17 +28,5 @@ p.hidden:hover a {
   }
   a:active {
     color: #888f96;
-  }
-  p.hidden {
-    color: #202123;
-  }
-  p.hidden a {
-    color: #202123;
-  }
-  p.hidden:hover {
-    color: #888f96;
-  }
-  p.hidden:hover a {
-    color: #aeb9c4;
   }
 }
