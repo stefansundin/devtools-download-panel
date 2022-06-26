@@ -602,12 +602,17 @@ return urls;\
 if (window.downloadPanelExtensionText !== undefined) {\
   return;\
 }\
+\
+const wrapper = document.createElement('div');\
+wrapper.style.all = 'unset';\
+const shadow = wrapper.attachShadow({ mode: 'closed' });\
+document.body.appendChild(wrapper);\
 const overlay = document.createElement('div');\
 overlay.style.position = 'fixed';\
 overlay.style.backgroundColor = 'rgba(255, 155, 0, 0.3)';\
 overlay.style.pointerEvents = 'none';\
 overlay.style.zIndex = 10000;\
-document.body.appendChild(overlay);\
+shadow.appendChild(overlay);\
 window.downloadPanelExtensionText = null;\
 let target = null;\
 \
@@ -615,7 +620,7 @@ function stop() {\
   window.removeEventListener('mouseover', handleMouseOver, true);\
   window.removeEventListener('scroll', updateTarget, true);\
   window.removeEventListener('click', handleClick, true);\
-  document.body.removeChild(overlay);\
+  document.body.removeChild(wrapper);\
   delete window.downloadPanelExtensionText;\
 }\
 function updateTarget() {\
