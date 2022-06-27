@@ -37,25 +37,6 @@ function extract_extension(url) {
   return '';
 }
 
-function debug(t) {
-  if (typeof t !== 'string') {
-    try {
-      t = JSON.stringify(t);
-    } catch (e) {
-      t = e.message;
-    }
-  }
-  let list = document.getElementById('log_list');
-  if (list === null) {
-    list = document.createElement('ul');
-    list.id = 'log_list';
-    document.body.appendChild(list);
-  }
-  const li = document.createElement('li');
-  li.appendChild(document.createTextNode(t));
-  list.appendChild(li);
-}
-
 window.addEventListener('load', () => {
   const url_input = document.getElementById('url');
   const filename_input = document.getElementById('filename');
@@ -658,9 +639,7 @@ window.addEventListener('click', handleClick, true);\
           '(function(){ return window.downloadPanelExtensionText; })()',
           (text, e) => {
             if (e) {
-              debug(
-                `e: ${e.isError}, ${e.code}, ${e.description}, ${e.details}, ${e.isException}, ${e.value}`,
-              );
+              console.error(e);
             }
             if (text === undefined) {
               clearInterval(inspect_interval);
@@ -778,7 +757,7 @@ window.addEventListener('click', handleClick, true);\
     });
 
     chrome.devtools.network.onNavigated.addListener(url => {
-      // debug(url);
+      // console.log(url);
       if (network_autoclear_checkbox.checked) {
         actions['clear-network']();
       }
@@ -789,9 +768,7 @@ window.addEventListener('click', handleClick, true);\
         "(function(){ if ($0 !== undefined) { return $0.getElementsByTagName('a').length; } })()",
         (count, e) => {
           if (e) {
-            debug(
-              `e: ${e.isError}, ${e.code}, ${e.description}, ${e.details}, ${e.isException}, ${e.value}`,
-            );
+            console.error(e);
           }
           const link = document.querySelector(
             '[action="grab-inspected-links"]',
@@ -812,9 +789,7 @@ window.addEventListener('click', handleClick, true);\
         '(function(){ if ($0 !== undefined) { return $0.textContent; } })()',
         (text, e) => {
           if (e) {
-            debug(
-              `e: ${e.isError}, ${e.code}, ${e.description}, ${e.details}, ${e.isException}, ${e.value}`,
-            );
+            console.error(e);
           }
           while (inspected_text_button.firstChild) {
             inspected_text_button.removeChild(inspected_text_button.firstChild);
