@@ -42,6 +42,9 @@ input.downloaded {
 .right-addon:focus-within a {
   display: none !important;
 }
+#ffmpeg_command_input {
+  display: none;
+}
 
 label {
   user-select: none;

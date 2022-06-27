@@ -11,7 +11,15 @@ function fmt_filesize(bytes) {
   return `${size} ${units[i]}`;
 }
 
-function extract_filename(url) {
+function extract_extension(filename) {
+  const i = filename.lastIndexOf('.');
+  if (i === -1) {
+    return '';
+  }
+  return filename.substr(i + 1);
+}
+
+function extract_url_filename(url) {
   let i = url.indexOf('?');
   if (i !== -1) {
     url = url.substr(0, i);
@@ -23,23 +31,18 @@ function extract_filename(url) {
   return url.substr(url.lastIndexOf('/') + 1);
 }
 
-function extract_extension(url) {
+function extract_url_extension(url) {
   const re = /^data:[a-z]+\/([a-z]+)[,;]/.exec(url);
   if (re) {
     return re[1];
-  } else {
-    const filename = extract_filename(url);
-    const i = filename.lastIndexOf('.');
-    if (i !== -1) {
-      return filename.substr(i + 1);
-    }
   }
-  return '';
+  return extract_extension(extract_url_filename(url));
 }
 
 window.addEventListener('load', () => {
   const url_input = document.getElementById('url');
   const filename_input = document.getElementById('filename');
+  const ffmpeg_command_input = document.getElementById('ffmpeg_command');
   const inspect_button = document.getElementById('inspect');
   const inspected_text_button = document.getElementById('inspected-text');
   const download_button = document.getElementById('download');
@@ -126,7 +129,7 @@ window.addEventListener('load', () => {
       }
       if (['/', '\\'].includes(opts.filename.slice(-1))) {
         // Auto-detect filename from url and append it
-        const filename = extract_filename(opts.url);
+        const filename = extract_url_filename(opts.url);
         if (filename === '') {
           alert(
             "While subdirectories are fine, you can't end the filename with a slash or backslash. If a filename could be detected from the url, it would be automatically appended.",
@@ -146,10 +149,10 @@ window.addEventListener('load', () => {
       }
       if (
         extract_extension(opts.filename) === '' &&
-        extract_extension(opts.url) !== ''
+        extract_url_extension(opts.url) !== ''
       ) {
         // Automatically use the extension from the url if the filename field is missing a file extension
-        opts.filename += '.' + extract_extension(opts.url);
+        opts.filename += '.' + extract_url_extension(opts.url);
       }
     }
     if (opts.filename === '') {
@@ -180,7 +183,7 @@ window.addEventListener('load', () => {
     const a = document.createElement('a');
     a.appendChild(document.createTextNode(opts.url));
     a.href = opts.url;
-    a.title = opts.filename ? opts.filename : extract_filename(opts.url);
+    a.title = opts.filename ? opts.filename : extract_url_filename(opts.url);
     a.addEventListener('click', e => {
       // allow middle click to open link in new window
       if (e.button === 0 && !(e.metaKey || e.ctrlKey)) {
@@ -231,11 +234,33 @@ window.addEventListener('load', () => {
     url_input.classList.toggle('downloaded', history.includes(url_input.value));
   }
 
+  function ffmpeg_update() {
+    const url_extension = extract_url_extension(url_input.value);
+    if (url_extension === 'm3u8') {
+      let filename = filename_input.value || 'video';
+      const filename_extension = extract_extension(filename);
+      if (
+        filename_extension === '' ||
+        filename_extension !== filename_extension.toLowerCase() ||
+        filename_extension.length > 4
+      ) {
+        filename += '.mp4';
+      }
+      filename = filename.replaceAll("'", '');
+      ffmpeg_command_input.value = `ffmpeg -i '${url_input.value}' -c copy '${filename}'`;
+      ffmpeg_command_input.style.display = 'block';
+    } else {
+      ffmpeg_command_input.style.display = 'none';
+    }
+  }
+
+  url_input.addEventListener('input', ffmpeg_update);
   url_input.addEventListener('input', url_update);
   url_input.addEventListener('focus', url_update);
   url_input.addEventListener('keyup', keyup);
-  filename_input.addEventListener('keyup', keyup);
+  filename_input.addEventListener('input', ffmpeg_update);
   filename_input.addEventListener('input', inspected_text_change);
+  filename_input.addEventListener('keyup', keyup);
   download_button.addEventListener('click', download);
   saveas_button.addEventListener('click', saveas);
 
@@ -255,6 +280,7 @@ window.addEventListener('load', () => {
       }
     }
     url_update();
+    ffmpeg_update();
   } else if (filename_input.value === '') {
     filename_input.focus();
   }
@@ -312,7 +338,7 @@ window.addEventListener('load', () => {
     network_visible_entries.push(entry);
     let filename = '';
     if (!entry.request.url.startsWith('data:')) {
-      filename = extract_filename(entry.request.url);
+      filename = extract_url_filename(entry.request.url);
     }
     const li = document.createElement('li');
     const span = document.createElement('span');
@@ -363,7 +389,8 @@ window.addEventListener('load', () => {
       if (entry.request.url.startsWith('data:image/')) {
         img.src = entry.request.url;
       } else {
-        const mime = 'image/' + (extract_extension(entry.request.url) || 'png');
+        const mime =
+          'image/' + (extract_url_extension(entry.request.url) || 'png');
         if (mime === 'image/svg') {
           mime += '+xml';
         }
