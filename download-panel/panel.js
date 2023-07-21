@@ -689,7 +689,6 @@ window.addEventListener('click', handleClick, true);\
     },
     'use-inspected-text': function (e) {
       filename_input.value = this.title;
-      filename_input.focus();
       inspected_text_change();
     },
     'grab-resources': function (e) {
