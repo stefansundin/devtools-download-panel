@@ -11,7 +11,7 @@ input[type=checkbox] {
   bottom: .08em;
 }
 input[pattern]:invalid {
-  color: red;
+  color: red !important;
 }
 input.downloaded {
   color: green;
@@ -22,7 +22,7 @@ input.downloaded {
 .right-addon a {
   position: absolute;
   padding: 1px 6px;
-  margin: 2px;
+  margin: 1px;
   max-width: 250px;
   overflow: hidden;
   text-overflow: ellipsis;
