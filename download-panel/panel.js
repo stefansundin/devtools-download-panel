@@ -663,9 +663,10 @@ window.addEventListener('click', handleClick, true);\
       inspect_interval = setInterval(() => {
         chrome.devtools.inspectedWindow.eval(
           '(function(){ return window.downloadPanelExtensionText; })()',
-          (text, e) => {
-            if (e) {
-              console.error(e);
+          (text, err) => {
+            if (err) {
+              console.error(err);
+              return;
             }
             if (text === undefined) {
               clearInterval(inspect_interval);
@@ -793,9 +794,10 @@ window.addEventListener('click', handleClick, true);\
     function check_inspected_element() {
       chrome.devtools.inspectedWindow.eval(
         "(function(){ if ($0 !== undefined) { return $0.getElementsByTagName('a').length; } })()",
-        (count, e) => {
-          if (e) {
-            console.error(e);
+        (count, err) => {
+          if (err) {
+            console.error(err);
+            return;
           }
           const link = document.querySelector(
             '[action="grab-inspected-links"]',
@@ -814,9 +816,10 @@ window.addEventListener('click', handleClick, true);\
       );
       chrome.devtools.inspectedWindow.eval(
         '(function(){ if ($0 !== undefined) { return $0.textContent; } })()',
-        (text, e) => {
-          if (e) {
-            console.error(e);
+        (text, err) => {
+          if (err) {
+            console.error(err);
+            return;
           }
           while (inspected_text_button.firstChild) {
             inspected_text_button.removeChild(inspected_text_button.firstChild);
