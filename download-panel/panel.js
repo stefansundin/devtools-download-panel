@@ -232,6 +232,7 @@ window.addEventListener('load', () => {
 
   function url_update() {
     url_input.classList.toggle('downloaded', history.includes(url_input.value));
+    ffmpeg_update();
   }
 
   function ffmpeg_update() {
@@ -246,7 +247,7 @@ window.addEventListener('load', () => {
       ) {
         filename += '.mp4';
       }
-      filename = filename.replaceAll("'", '');
+      filename = filename.replaceAll("'", '').replace(/[\/\\]/g, '-');
       ffmpeg_command_input.value = `ffmpeg -i '${url_input.value}' -c copy '${filename}'`;
       ffmpeg_command_input.style.display = 'block';
     } else {
@@ -254,7 +255,6 @@ window.addEventListener('load', () => {
     }
   }
 
-  url_input.addEventListener('input', ffmpeg_update);
   url_input.addEventListener('input', url_update);
   url_input.addEventListener('focus', url_update);
   url_input.addEventListener('keyup', keyup);
@@ -280,7 +280,6 @@ window.addEventListener('load', () => {
       }
     }
     url_update();
-    ffmpeg_update();
   } else if (filename_input.value === '') {
     filename_input.focus();
   }
@@ -682,6 +681,7 @@ window.addEventListener('click', handleClick, true);\
               return;
             }
             filename_input.value = text;
+            ffmpeg_update();
           },
         );
       }, 100);
