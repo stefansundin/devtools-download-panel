@@ -16,13 +16,16 @@ input[pattern]:invalid {
 input.downloaded {
   color: green;
 }
-.right-addon {
-  position: relative;
-}
-.right-addon a {
+#filename-addon {
+  float: right;
   position: absolute;
+  top: 33px;
+  right: 11px;
+}
+#filename-addon a {
+  display: inline-block;
   padding: 1px 6px;
-  margin: 1px;
+  margin-right: 4px;
   max-width: 250px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -31,18 +34,11 @@ input.downloaded {
   border-radius: 3px;
 }
 #inspect {
-  right: 0;
   min-width: 44px;
   text-align: center;
 }
-#inspected-text {
-  right: 60px;
-}
-#use-document-title {
-  right: 150px;
-}
-.right-addon a:empty,
-.right-addon:focus-within a {
+#filename-addon a:empty,
+#filename-container:focus-within a {
   display: none !important;
 }
 #ffmpeg_command_input {
@@ -167,6 +163,6 @@ body.theme-dark #scroll-to-top {
 body.theme-dark li span {
   color: #888f96;
 }
-body.theme-dark .right-addon a {
+body.theme-dark #filename-addon a {
   color: black;
 }

@@ -246,9 +246,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function filename_update() {
     inspected_text_button.style.display =
-      filename_input.value === inspected_text_button.title ? 'none' : 'block';
+      filename_input.value === inspected_text_button.title ? 'none' : '';
     use_document_title.style.display =
-      filename_input.value === use_document_title.title ? 'none' : 'block';
+      filename_input.value === use_document_title.title ? 'none' : '';
   }
 
   function url_update() {
@@ -865,7 +865,7 @@ window.addEventListener('click', handleClick, true);\
           if (text !== '') {
             inspected_text_button.title = text;
             inspected_text_button.textContent = text;
-            inspected_text_button.style.display = 'block';
+            inspected_text_button.style.display = '';
           }
         },
       );
@@ -903,9 +903,7 @@ window.addEventListener('click', handleClick, true);\
           use_document_title.title = title;
           use_document_title.textContent = title;
           use_document_title.style.display =
-            filename_input.value === use_document_title.title
-              ? 'none'
-              : 'block';
+            filename_input.value === use_document_title.title ? 'none' : '';
         },
       );
     }
