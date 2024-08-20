@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const version = chrome.runtime.getManifest().version;
   const version_span = document.getElementById('version');
-  version_span.appendChild(document.createTextNode(`v${version}`));
+  version_span.textContent = `v${version}`;
 
   const platform = await chrome.runtime.sendMessage({ action: 'get-platform' });
   for (const link of document.querySelectorAll(
@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     history.push(opts.url);
     const li = document.createElement('li');
     const a = document.createElement('a');
-    a.appendChild(document.createTextNode(opts.url));
+    a.textContent = opts.url;
     a.href = opts.url;
     a.title = opts.filename ? opts.filename : extract_url_filename(opts.url);
     a.addEventListener('click', e => {
@@ -375,7 +375,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const instant_link = document.createElement('a');
     instant_link.href = '#'; // needed for middle click
     instant_link.title = `Download ${filename}`;
-    instant_link.appendChild(document.createTextNode('download'));
+    instant_link.textContent = 'download';
     // highlight url when hovering instant download link
     instant_link.addEventListener('mouseenter', () =>
       url_link.classList.add('hover'),
@@ -403,7 +403,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (entry.content || entry.request.url.startsWith('data:image/')) {
       span.appendChild(document.createTextNode('['));
       const a = document.createElement('a');
-      a.appendChild(document.createTextNode('preview'));
+      a.textContent = 'preview';
       const img = document.createElement('img');
 
       if (entry.request.url.startsWith('data:image/')) {
@@ -437,7 +437,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // link to populate form
-    url_link.appendChild(document.createTextNode(entry.request.url));
+    url_link.textContent = entry.request.url;
     url_link.href = entry.request.url;
     url_link.addEventListener('click', e => {
       // allow middle click to open link in new window (or command or ctrl key)
@@ -521,19 +521,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   function update_request_stats() {
     const shown = network_list.childNodes.length;
     const total = network_entries.length;
-    while (network_stats.hasChildNodes()) {
-      network_stats.removeChild(network_stats.firstChild);
-    }
     if (shown !== total) {
-      network_stats.appendChild(
-        document.createTextNode(`Showing ${shown} / ${total} urls.`),
-      );
+      network_stats.textContent = `Showing ${shown} / ${total} urls.`;
     } else if (total === 0) {
-      network_stats.appendChild(document.createTextNode('No urls captured.'));
+      network_stats.textContent = 'No urls captured.';
     } else {
-      network_stats.appendChild(
-        document.createTextNode(`Captured ${shown} urls.`),
-      );
+      network_stats.textContent = `Captured ${shown} urls.`;
     }
   }
 
@@ -854,9 +847,6 @@ window.addEventListener('click', handleClick, true);\
             console.error(err);
             return;
           }
-          while (inspected_text_button.firstChild) {
-            inspected_text_button.removeChild(inspected_text_button.firstChild);
-          }
           // text is undefined if there is no element selected, this happens when the user navigates to another page
           text = (text || '')
             .replace(/[:*?"<>|\r\n]/g, '')
@@ -866,6 +856,8 @@ window.addEventListener('click', handleClick, true);\
             inspected_text_button.title = text;
             inspected_text_button.textContent = text;
             inspected_text_button.style.display = '';
+          } else {
+            inspected_text_button.textContent = '';
           }
         },
       );
