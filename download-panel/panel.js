@@ -1,7 +1,17 @@
 // We have to use a lot of setTimeout in click handlers unfortunately, otherwise it will cause another click if the content scrolls up due to what happens in the handler.
 
 function fmt_filesize(bytes) {
-  const units = ['bytes', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+  const units = [
+    'bytes',
+    'KiB',
+    'MiB',
+    'GiB',
+    'TiB',
+    'PiB',
+    'EiB',
+    'ZiB',
+    'YiB',
+  ];
   let i = 0;
   while (bytes > 1024) {
     bytes = bytes / 1024;
@@ -87,7 +97,7 @@ window.addEventListener('load', () => {
   const scroll_to_top = document.getElementById('scroll-to-top');
   scroll_to_top.addEventListener('click', () => window.scrollTo(0, 0));
   window.addEventListener('scroll', () => {
-    if (window.pageYOffset > 0) {
+    if (window.scrollY > 0) {
       if (scroll_to_top.style.display === 'none') {
         scroll_to_top.style.display = 'block';
       }
@@ -278,11 +288,11 @@ window.addEventListener('load', () => {
     } else {
       if (/^https?:\/\//i.test(text)) {
         setTimeout(() => filename_input.focus(), 10);
+        url_update();
       } else {
         url_input.value = '';
       }
     }
-    url_update();
   } else if (filename_input.value === '') {
     filename_input.focus();
   }
@@ -391,7 +401,7 @@ window.addEventListener('load', () => {
       if (entry.request.url.startsWith('data:image/')) {
         img.src = entry.request.url;
       } else {
-        const mime =
+        let mime =
           'image/' + (extract_url_extension(entry.request.url) || 'png');
         if (mime === 'image/svg') {
           mime += '+xml';
@@ -447,7 +457,7 @@ window.addEventListener('load', () => {
   }
 
   function valid_request(entry) {
-    // ignore data uris (0), redirects (3xx), grab resources: empty url, chrome-extension, about:, extensions:
+    // ignore data urls (0), redirects (3xx), grab resources: empty url, chrome-extension, about:, extensions:
     const status = entry.response.status;
     const url = entry.request.url;
     const prefix = url.substr(0, url.indexOf(':'));
@@ -459,7 +469,7 @@ window.addEventListener('load', () => {
     ) {
       return false;
     }
-    // don't allow duplicate urls
+    // don't record duplicate urls
     if (
       network_entries.some(existing_entry => existing_entry.request.url === url)
     ) {
@@ -699,7 +709,7 @@ window.addEventListener('click', handleClick, true);\
             }
             text = (text || '')
               .replace(/[:*?"<>|\r\n]/g, '')
-              .replace(/[\t ]+/g, ' ')
+              .replace(/[\t \xa0]+/g, ' ')
               .trim();
             if (text === filename_input.value) {
               return;
