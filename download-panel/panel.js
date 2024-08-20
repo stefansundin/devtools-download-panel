@@ -49,7 +49,7 @@ function extract_url_extension(url) {
   return extract_extension(extract_url_filename(url));
 }
 
-window.addEventListener('load', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   const url_input = document.getElementById('url');
   const filename_input = document.getElementById('filename');
   const ffmpeg_command_input = document.getElementById('ffmpeg_command');
@@ -79,6 +79,14 @@ window.addEventListener('load', () => {
   const version = chrome.runtime.getManifest().version;
   const version_span = document.getElementById('version');
   version_span.appendChild(document.createTextNode(`v${version}`));
+
+  const platform = await chrome.runtime.sendMessage({ action: 'get-platform' });
+  for (const link of document.querySelectorAll(
+    'a[href="chrome://downloads"]',
+  )) {
+    link.title = platform.os === 'mac' ? '⌘ + Shift + J' : 'Ctrl + J';
+  }
+  const quoteCharacter = platform.os === 'win' ? '"' : "'";
 
   let history = [];
   let inspect_interval = null;
@@ -261,7 +269,7 @@ window.addEventListener('load', () => {
         filename += '.mp4';
       }
       filename = filename.replaceAll("'", '').replace(/[\/\\]/g, '-');
-      ffmpeg_command_input.value = `ffmpeg -i '${url_input.value}' -c copy '${filename}'`;
+      ffmpeg_command_input.value = `ffmpeg -i ${quoteCharacter}${url_input.value}${quoteCharacter} -c copy ${quoteCharacter}${filename}${quoteCharacter}`;
       ffmpeg_command_input.style.display = 'block';
     } else {
       ffmpeg_command_input.style.display = 'none';
@@ -784,14 +792,6 @@ window.addEventListener('click', handleClick, true);\
       actions[this.getAttribute('action')].call(this, e);
     });
   }
-
-  chrome.runtime.sendMessage({ action: 'get-platform' }).then(platform => {
-    for (const link of document.querySelectorAll(
-      'a[href="chrome://downloads"]',
-    )) {
-      link.title = platform.os === 'mac' ? '⌘ + Shift + J' : 'Ctrl + J';
-    }
-  });
 
   // Only try to use chrome.devtools.* APIs if we're a devtools page (opening the chrome-extension url in its own tab will cause Aw Snap)
   if (window.top !== window) {
