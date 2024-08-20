@@ -2,9 +2,7 @@
 
 Adds a download panel to your devtools!
 
-Chrome Web Store: https://chrome.google.com/webstore/detail/download-panel/dfkcgjijchipieeogdonnjbhlhjphbfn
-
-When this extension fails to do the job, you can try [Chrono Download Manager](https://chrome.google.com/webstore/detail/chrono-download-manager/mciiogijehkdemklbdcbfkefimifhecn). Then file an issue and let me know how I can improve this extension. :)
+Chrome Web Store: https://chromewebstore.google.com/detail/download-panel/dfkcgjijchipieeogdonnjbhlhjphbfn
 
 Icon from: https://iconarchive.com/show/100-flat-icons-by-graphicloads/download-3-icon.html
 
