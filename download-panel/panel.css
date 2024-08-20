@@ -38,6 +38,9 @@ input.downloaded {
 #inspected-text {
   right: 60px;
 }
+#use-document-title {
+  right: 150px;
+}
 .right-addon a:empty,
 .right-addon:focus-within a {
   display: none !important;

@@ -44,6 +44,7 @@ window.addEventListener('load', () => {
   const filename_input = document.getElementById('filename');
   const ffmpeg_command_input = document.getElementById('ffmpeg_command');
   const inspect_button = document.getElementById('inspect');
+  const use_document_title = document.getElementById('use-document-title');
   const inspected_text_button = document.getElementById('inspected-text');
   const download_button = document.getElementById('download');
   const saveas_button = document.getElementById('saveas');
@@ -225,9 +226,11 @@ window.addEventListener('load', () => {
     }
   }
 
-  function inspected_text_change() {
+  function filename_update() {
     inspected_text_button.style.display =
       filename_input.value === inspected_text_button.title ? 'none' : 'block';
+    use_document_title.style.display =
+      filename_input.value === use_document_title.title ? 'none' : 'block';
   }
 
   function url_update() {
@@ -259,7 +262,7 @@ window.addEventListener('load', () => {
   url_input.addEventListener('focus', url_update);
   url_input.addEventListener('keyup', keyup);
   filename_input.addEventListener('input', ffmpeg_update);
-  filename_input.addEventListener('input', inspected_text_change);
+  filename_input.addEventListener('input', filename_update);
   filename_input.addEventListener('keyup', keyup);
   download_button.addEventListener('click', download);
   saveas_button.addEventListener('click', saveas);
@@ -623,6 +626,26 @@ shadow.appendChild(overlay);\
 window.downloadPanelExtensionText = null;\
 let target = null;\
 \
+function getText(node) {\
+  if (node.nodeType === Node.ELEMENT_NODE) {\
+    if (node.value || node.alt || node.placeholder) {\
+      return node.value || node.alt || node.placeholder;\
+    }\
+    let text = Array.from(node.childNodes).map(getText).filter(Boolean).join('');\
+    const display = getComputedStyle(node).display;\
+    if (node.tagName === 'BR' || display.includes('block') || display === 'list-item') {\
+      if (text === '') {\
+        return text;\
+      }\
+      return ' '+text+' ';\
+    }\
+    return text;\
+  } else if (node.nodeType === Node.TEXT_NODE) {\
+    return node.nodeValue;\
+  } else {\
+    return '';\
+  }\
+}\
 function stop() {\
   window.removeEventListener('mouseover', handleMouseOver, true);\
   window.removeEventListener('scroll', updateTarget, true);\
@@ -640,7 +663,7 @@ function updateTarget() {\
   overlay.style.top = rect.top+'px';\
   overlay.style.width = rect.width+'px';\
   overlay.style.height = rect.height+'px';\
-  window.downloadPanelExtensionText = (target.textContent || target.value || target.alt)?.trim() || '';\
+  window.downloadPanelExtensionText = getText(target)?.trim() || '';\
 }\
 function handleMouseOver(e) {\
   target = e.target;\
@@ -687,9 +710,10 @@ window.addEventListener('click', handleClick, true);\
         );
       }, 100);
     },
-    'use-inspected-text': function (e) {
+    'adopt-text-for-filename': function (e) {
       filename_input.value = this.title;
-      inspected_text_change();
+      filename_update();
+      ffmpeg_update();
     },
     'grab-resources': function (e) {
       chrome.devtools.inspectedWindow.getResources(resources => {
@@ -814,7 +838,7 @@ window.addEventListener('click', handleClick, true);\
         },
       );
       chrome.devtools.inspectedWindow.eval(
-        '(function(){ if ($0 !== undefined) { return $0.textContent; } })()',
+        '(function(){ if ($0 !== undefined && $0 !== document.body) { return $0.textContent; } })()',
         (text, err) => {
           if (err) {
             console.error(err);
@@ -824,20 +848,36 @@ window.addEventListener('click', handleClick, true);\
             inspected_text_button.removeChild(inspected_text_button.firstChild);
           }
           // text is undefined if there is no element selected, this happens when the user navigates to another page
-          if (text === undefined) {
-            text = '';
-          }
-          text = text
+          text = (text || '')
             .replace(/[:*?"<>|\r\n]/g, '')
             .replace(/[\t ]+/g, ' ')
             .trim();
           if (text !== '') {
             inspected_text_button.title = text;
-            inspected_text_button.appendChild(
-              document.createTextNode(text.substr(0, 50)),
-            );
+            inspected_text_button.textContent = text;
             inspected_text_button.style.display = 'block';
           }
+        },
+      );
+    }
+
+    function update_document_title() {
+      chrome.devtools.inspectedWindow.eval(
+        '(function(){ return document.title; })()',
+        (title, err) => {
+          if (err) {
+            console.error(err);
+            return;
+          }
+          title = (title || '')
+            .replace(/[:*?"<>|\r\n]/g, '')
+            .replace(/[\t ]+/g, ' ')
+            .trim();
+          if (title === use_document_title.title) {
+            return;
+          }
+          use_document_title.title = title;
+          use_document_title.textContent = title;
         },
       );
     }
@@ -849,6 +889,9 @@ window.addEventListener('click', handleClick, true);\
         check_inspected_element,
       );
       check_inspected_element();
+      update_document_title();
+      chrome.devtools.network.onNavigated.addListener(update_document_title);
+      setInterval(update_document_title, 1000); // detect title updates
     }
   }
 });

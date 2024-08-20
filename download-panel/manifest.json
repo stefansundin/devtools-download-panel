@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Download panel",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Adds a download panel to the Developer Tools.",
   "homepage_url": "https://github.com/stefansundin/chrome-download-panel",
   "author": "Stefan Sundin",
