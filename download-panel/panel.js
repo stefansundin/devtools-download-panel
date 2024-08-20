@@ -91,16 +91,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   let history = [];
   let inspect_interval = null;
 
-  let options = {
-    reverse_list: false,
-    hide_data: false,
-  };
-  chrome.runtime.sendMessage({ action: 'get-options' }).then(items => {
-    if (items) {
-      options = items;
-      network_hidedata_checkbox.checked = options.hide_data;
-    }
-  });
+  const options = await chrome.runtime.sendMessage({ action: 'get-options' });
+  network_hidedata_checkbox.checked = options.hide_data;
 
   const scroll_to_top = document.getElementById('scroll-to-top');
   scroll_to_top.addEventListener('click', () => window.scrollTo(0, 0));
