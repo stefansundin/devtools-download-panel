@@ -1,6 +1,7 @@
-/*.pem
-/*.crx
-/download-panel-*.zip
+/dist
+*.pem
+*.crx
+*.zip
 Thumbs.db
 .DS_Store
 *.swp
