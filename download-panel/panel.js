@@ -863,13 +863,27 @@ window.addEventListener('click', handleClick, true);\
 
     function update_document_title() {
       chrome.devtools.inspectedWindow.eval(
-        '(function(){ return document.title; })()',
-        (title, err) => {
+        '(function(){ return [document.location.href, document.title]; })()',
+        ([url, title], err) => {
           if (err) {
             console.error(err);
             return;
           }
-          title = (title || '')
+          const uri = new URL(url);
+          title = (title || '').trim();
+          if (title) {
+            const lastPart = title.split(' ').at(-1).toLowerCase();
+            if (
+              title.length > lastPart.length &&
+              (uri.hostname.endsWith(lastPart) ||
+                uri.hostname.split('.').includes(lastPart))
+            ) {
+              title = title
+                .substring(0, title.length - lastPart.length)
+                .replace(/[\-|\t ]+$/, '');
+            }
+          }
+          title = title
             .replace(/[:*?"<>|\r\n]/g, '')
             .replace(/[\t ]+/g, ' ')
             .trim();
@@ -878,6 +892,10 @@ window.addEventListener('click', handleClick, true);\
           }
           use_document_title.title = title;
           use_document_title.textContent = title;
+          use_document_title.style.display =
+            filename_input.value === use_document_title.title
+              ? 'none'
+              : 'block';
         },
       );
     }
