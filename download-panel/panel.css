@@ -19,13 +19,13 @@ input.downloaded {
 #filename-addon {
   float: right;
   position: absolute;
-  top: 33px;
-  right: 11px;
+  top: 31px;
+  right: 5px;
 }
 #filename-addon a {
-  display: inline-block;
+  float: right;
   padding: 1px 6px;
-  margin-right: 4px;
+  margin: 2px 4px 2px 0;
   max-width: 250px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -89,6 +89,18 @@ img.preview {
   position: absolute;
   left: 200px;
   background-image: url(img/alpha.png);
+}
+.clearfix {
+  clear: both;
+}
+.float-left {
+  float: left;
+}
+.float-right {
+  float: right;
+}
+.d-none {
+  display: none;
 }
 #scroll-to-top {
   position: fixed;
