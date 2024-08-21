@@ -1,37 +1,37 @@
-const default_options = {
-  reverse_list: false,
-  hide_data: false,
+const defaultOptions = {
+  reverseList: false,
+  networkHidedata: false,
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const reverse_list_input = document.getElementById('reverse_list');
-  const hide_data_input = document.getElementById('hide_data');
-  const save_button = document.getElementById('save');
+  const reverseListCheckbox = document.getElementById('reverse-list');
+  const networkHidedataCheckbox = document.getElementById('network-hidedata');
+  const saveButton = document.getElementById('save');
   const status = document.getElementById('status');
 
-  const options = await chrome.storage.sync.get(default_options);
-  reverse_list_input.checked = options.reverse_list;
-  hide_data_input.checked = options.hide_data;
+  const options = await chrome.storage.sync.get(defaultOptions);
+  reverseListCheckbox.checked = options.reverseList;
+  networkHidedataCheckbox.checked = options.networkHidedata;
 
-  save_button.addEventListener('click', async () => {
-    const new_options = {
-      reverse_list: reverse_list_input.checked,
-      hide_data: hide_data_input.checked,
+  saveButton.addEventListener('click', async () => {
+    const newOptions = {
+      reverseList: reverseListCheckbox.checked,
+      networkHidedata: networkHidedataCheckbox.checked,
     };
-    await chrome.storage.sync.set(new_options);
+    await chrome.storage.sync.set(newOptions);
     status.textContent = 'Options saved.';
     setTimeout(() => {
       status.textContent = '';
     }, 5000);
     chrome.runtime.sendMessage({
       action: 'update-options',
-      options: new_options,
+      options: newOptions,
     });
   });
 
   document.getElementById('reset').addEventListener('click', async () => {
-    reverse_list_input.checked = false;
-    hide_data_input.checked = false;
+    reverseListCheckbox.checked = defaultOptions.reverseList;
+    networkHidedataCheckbox.checked = defaultOptions.networkHidedata;
     await chrome.storage.sync.clear();
     status.textContent = 'Options reset.';
     setTimeout(() => {
@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }, 5000);
     chrome.runtime.sendMessage({
       action: 'update-options',
-      options: default_options,
+      options: defaultOptions,
     });
   });
 });

@@ -21,4 +21,4 @@ Icon from: https://iconarchive.com/show/100-flat-icons-by-graphicloads/download-
 - Use the <kbd>Inspect</kbd> badge in the filename field to easily grab text from the page and use it for the filename.
 - A red circle means that the network entry appeared after you filtered the list. A green circle means you have already downloaded the URL (it is in the history list).
 - If you use a Network filter regular expression that have capture groups, then you can reference those capture groups in the filename field with `$1`, `$2`, `$3`, etc.
-- If the URL ends with `.m3u8` then a text field with an `ffmpeg` command appears which you can copy paste directly into a terminal to download the video that the playlist is for.
+- If the URL ends with `.m3u8` then a text field with an `ffmpeg` command appears which you can copy paste into a terminal to download the video that the playlist is for.

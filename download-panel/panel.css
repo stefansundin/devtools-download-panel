@@ -1,11 +1,11 @@
 body {
   padding-bottom: 30px;
 }
-input[type=search] {
+input[type='search'] {
   width: 100%;
   font-family: "Courier New";
 }
-input[type=checkbox] {
+input[type='checkbox'] {
   vertical-align: middle;
   position: relative;
   bottom: .08em;
@@ -40,9 +40,6 @@ input.downloaded {
 #filename-addon a:empty,
 #filename-container:focus-within a {
   display: none !important;
-}
-#ffmpeg_command_input {
-  display: none;
 }
 
 label {
@@ -113,15 +110,15 @@ body[history] .history {
   display: block;
 }
 
-#network_minsize {
+#network-minsize-value {
   width: 90px;
   color: lightgray;
 }
-#network_minsize.enabled {
+#network-minsize-value.enabled {
   color: black;
 }
 
-#network_stats {
+#network-stats {
   display: inline-block;
   min-width: 120px;
   margin-right: 10px;
@@ -144,16 +141,16 @@ body.theme-dark a {
 body.theme-dark a[disabled] {
   color: #888f96;
 }
-body.theme-dark input[type=search] {
+body.theme-dark input[type='search'] {
   background-color: #212021;
   color: rgb(228, 231, 234);
   border: 1px solid #5c5c5c;
   border-radius: 2px;
 }
-body.theme-dark #network_minsize {
+body.theme-dark #network-minsize-value {
   color: #888f96;
 }
-body.theme-dark #network_minsize.enabled {
+body.theme-dark #network-minsize-value.enabled {
   color: #cccccc;
 }
 body.theme-dark #scroll-to-top {

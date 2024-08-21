@@ -1,17 +1,17 @@
 // There are many things the devtools panel can't do on its own, so that's why this is required.
 
-const default_options = {
-  reverse_list: false,
-  hide_data: false,
+const defaultOptions = {
+  reverseList: false,
+  networkHidedata: false,
 };
 
 let platform, options;
 
-chrome.runtime.getPlatformInfo().then(info => {
+chrome.runtime.getPlatformInfo().then((info) => {
   platform = info;
 });
 
-chrome.storage.sync.get(default_options).then(items => {
+chrome.storage.sync.get(defaultOptions).then((items) => {
   options = items;
 });
 

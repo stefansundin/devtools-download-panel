@@ -1,6 +1,6 @@
 // We have to use a lot of setTimeout in click handlers unfortunately, otherwise it will cause another click if the content scrolls up due to what happens in the handler.
 
-function fmt_filesize(bytes) {
+function formatFilesize(bytes, digits = 1) {
   const units = [
     'bytes',
     'KiB',
@@ -13,72 +13,69 @@ function fmt_filesize(bytes) {
     'YiB',
   ];
   let i = 0;
-  while (bytes > 1024) {
-    bytes = bytes / 1024;
+  let size = bytes;
+  while (size > 1024 && i < units.length) {
+    size = size / 1024;
     i++;
   }
-  const size = i > 0 ? bytes.toFixed(1) : bytes;
+  if (i > 0) {
+    size = size.toFixed(digits);
+  }
   return `${size} ${units[i]}`;
 }
 
-function extract_extension(filename) {
+function extractFilenameExtension(filename) {
   const i = filename.lastIndexOf('.');
   if (i === -1) {
     return '';
   }
-  return filename.substr(i + 1);
+  return filename.substring(i + 1);
 }
 
-function extract_url_filename(url) {
+function extractUrlFilename(url) {
   let i = url.indexOf('?');
   if (i !== -1) {
-    url = url.substr(0, i);
+    url = url.substring(0, i);
   }
   i = url.indexOf('#');
   if (i !== -1) {
-    url = url.substr(0, i);
+    url = url.substring(0, i);
   }
-  return url.substr(url.lastIndexOf('/') + 1);
+  return url.substring(url.lastIndexOf('/') + 1);
 }
 
-function extract_url_extension(url) {
+function extractUrlFilenameExtension(url) {
   const re = /^data:[a-z]+\/([a-z]+)[,;]/.exec(url);
   if (re) {
     return re[1];
   }
-  return extract_extension(extract_url_filename(url));
+  return extractFilenameExtension(extractUrlFilename(url));
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const url_input = document.getElementById('url');
-  const filename_input = document.getElementById('filename');
-  const ffmpeg_command_input = document.getElementById('ffmpeg_command');
-  const inspect_button = document.getElementById('inspect');
-  const use_document_title = document.getElementById('use-document-title');
-  const inspected_text_button = document.getElementById('inspected-text');
-  const download_button = document.getElementById('download');
-  const saveas_button = document.getElementById('saveas');
-  const history_list = document.getElementById('history');
-  const network_regex_input = document.getElementById('network_regex');
-  const network_minsize_checkbox = document.getElementById(
-    'network_minsize_checkbox',
+  const urlInput = document.getElementById('url');
+  const filenameInput = document.getElementById('filename');
+  const ffmpegCommandInput = document.getElementById('ffmpeg-command');
+  const inspectButton = document.getElementById('inspect');
+  const useDocumentTitleButton = document.getElementById('use-document-title');
+  const useInspectedTextButton = document.getElementById('use-inspected-text');
+  const downloadButton = document.getElementById('download');
+  const saveAsButton = document.getElementById('saveas');
+  const historyList = document.getElementById('history');
+  const networkRegexpInput = document.getElementById('network-regexp');
+  const networkMinsizeCheckbox = document.getElementById('network-minsize');
+  const networkHidedataCheckbox = document.getElementById('network-hidedata');
+  const networkMinsizeInput = document.getElementById('network-minsize-value');
+  const networkAutodownloadCheckbox = document.getElementById(
+    'network-autodownload',
   );
-  const network_hidedata_checkbox = document.getElementById(
-    'network_hidedata_checkbox',
-  );
-  const network_minsize_input = document.getElementById('network_minsize');
-  const network_autodownload_checkbox = document.getElementById(
-    'network_autodownload_checkbox',
-  );
-  const network_autoclear_checkbox = document.getElementById(
-    'network_autoclear_checkbox',
-  );
-  const network_list = document.getElementById('network');
-  const network_stats = document.getElementById('network_stats');
+  const networkAutoclearCheckbox = document.getElementById('network-autoclear');
+  const networkList = document.getElementById('network');
+  const networkStats = document.getElementById('network-stats');
 
   const version = chrome.runtime.getManifest().version;
-  const version_span = document.getElementById('version');
-  version_span.textContent = `v${version}`;
+  const versionInfo = document.getElementById('version-info');
+  versionInfo.textContent = `v${version}`;
 
   const platform = await chrome.runtime.sendMessage({ action: 'get-platform' });
   for (const link of document.querySelectorAll(
@@ -89,26 +86,26 @@ document.addEventListener('DOMContentLoaded', async () => {
   const quoteCharacter = platform.os === 'win' ? '"' : "'";
 
   let history = [];
-  let inspect_interval = null;
+  let inspectInterval = null;
 
   const options = await chrome.runtime.sendMessage({ action: 'get-options' });
-  network_hidedata_checkbox.checked = options.hide_data;
+  networkHidedataCheckbox.checked = options.networkHidedata;
 
-  const scroll_to_top = document.getElementById('scroll-to-top');
-  scroll_to_top.addEventListener('click', () => window.scrollTo(0, 0));
+  const scrollToTopLink = document.getElementById('scroll-to-top');
+  scrollToTopLink.addEventListener('click', () => window.scrollTo(0, 0));
   window.addEventListener('scroll', () => {
     if (window.scrollY > 0) {
-      if (scroll_to_top.style.display === 'none') {
-        scroll_to_top.style.display = 'block';
+      if (scrollToTopLink.style.display === 'none') {
+        scrollToTopLink.style.display = 'block';
       }
     } else {
-      if (scroll_to_top.style.display === 'block') {
-        scroll_to_top.style.display = 'none';
+      if (scrollToTopLink.style.display === 'block') {
+        scrollToTopLink.style.display = 'none';
       }
     }
   });
 
-  // prevent Esc key from bringing up the console in input fields
+  // Prevent Esc key from bringing up the console in input fields
   function keydown(e) {
     if (e.keyCode === 27) {
       e.stopPropagation();
@@ -119,12 +116,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     input.addEventListener('keydown', keydown);
   }
 
-  function start_download(opts) {
+  function startDownload(opts) {
     if (opts.url === '') {
       return;
     }
     if (opts.filename) {
-      const pattern = new RegExp(filename_input.pattern);
+      const pattern = new RegExp(filenameInput.pattern);
       if (!pattern.test(opts.filename)) {
         if (
           confirm(
@@ -140,7 +137,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
       if (['/', '\\'].includes(opts.filename.slice(-1))) {
         // Auto-detect filename from url and append it
-        const filename = extract_url_filename(opts.url);
+        const filename = extractUrlFilename(opts.url);
         if (filename === '') {
           alert(
             "While subdirectories are fine, you can't end the filename with a slash or backslash. If a filename could be detected from the url, it would be automatically appended.",
@@ -150,20 +147,20 @@ document.addEventListener('DOMContentLoaded', async () => {
           opts.filename += filename;
         }
       }
-      if (network_regex_input.value !== '' && opts.filename.includes('$')) {
-        const network_re = new RegExp(network_regex_input.value, 'i');
-        const network_ret = network_re.exec(opts.url);
+      if (networkRegexpInput.value !== '' && opts.filename.includes('$')) {
+        const networkRegExp = new RegExp(networkRegexpInput.value, 'i');
+        const regExpExecResult = networkRegExp.exec(opts.url);
         opts.filename = opts.filename.replace(/\$(\d+)/g, (match, p1) => {
           const n = parseInt(p1, 10);
-          return network_ret[n];
+          return regExpExecResult[n];
         });
       }
       if (
-        extract_extension(opts.filename) === '' &&
-        extract_url_extension(opts.url) !== ''
+        extractFilenameExtension(opts.filename) === '' &&
+        extractUrlFilenameExtension(opts.url) !== ''
       ) {
         // Automatically use the extension from the url if the filename field is missing a file extension
-        opts.filename += '.' + extract_url_extension(opts.url);
+        opts.filename += '.' + extractUrlFilenameExtension(opts.url);
       }
     }
     if (opts.filename === '') {
@@ -175,56 +172,56 @@ document.addEventListener('DOMContentLoaded', async () => {
       opts: opts,
     });
 
-    // mark in network list as downloaded
-    let i = network_visible_entries.findIndex(
-      entry => entry.request.url === opts.url,
+    // Mark in network list as downloaded
+    let i = networkVisibleEntries.findIndex(
+      (entry) => entry.request.url === opts.url,
     );
     if (i !== -1) {
-      if (options.reverse_list) {
-        i = network_visible_entries.length - 1 - i;
+      if (options.reverseList) {
+        i = networkVisibleEntries.length - 1 - i;
       }
-      const li = network_list.getElementsByTagName('li')[i];
+      const li = networkList.getElementsByTagName('li')[i];
       li.classList.add('downloaded');
     }
 
-    // add to history
+    // Add to history
     document.body.setAttribute('history', '');
     history.push(opts.url);
     const li = document.createElement('li');
     const a = document.createElement('a');
     a.textContent = opts.url;
     a.href = opts.url;
-    a.title = opts.filename ? opts.filename : extract_url_filename(opts.url);
-    a.addEventListener('click', e => {
-      // allow middle click to open link in new window
+    a.title = opts.filename ? opts.filename : extractUrlFilename(opts.url);
+    a.addEventListener('click', (e) => {
+      // Make middle click to open link in new window
       if (e.button === 0 && !(e.metaKey || e.ctrlKey)) {
         e.preventDefault();
-        url_input.value = opts.url;
-        url_update();
-        filename_input.value = opts.filename ? opts.filename : '';
-        setTimeout(() => filename_input.focus(), 100);
+        urlInput.value = opts.url;
+        urlUpdate();
+        filenameInput.value = opts.filename ? opts.filename : '';
+        setTimeout(() => filenameInput.focus(), 100);
       }
     });
     li.appendChild(a);
-    if (options.reverse_list) {
-      history_list.insertBefore(li, history_list.firstChild);
+    if (options.reverseList) {
+      historyList.insertBefore(li, historyList.firstChild);
     } else {
-      history_list.appendChild(li);
+      historyList.appendChild(li);
     }
-    url_update();
+    urlUpdate();
   }
 
   function download() {
-    start_download({
-      url: url_input.value,
-      filename: filename_input.value,
+    startDownload({
+      url: urlInput.value,
+      filename: filenameInput.value,
     });
   }
 
   function saveas() {
-    start_download({
-      url: url_input.value,
-      filename: filename_input.value,
+    startDownload({
+      url: urlInput.value,
+      filename: filenameInput.value,
       saveAs: true,
     });
   }
@@ -232,166 +229,166 @@ document.addEventListener('DOMContentLoaded', async () => {
   function keyup(e) {
     if (e.keyCode === 13) {
       download();
-      // url_update();
+      // urlUpdate();
     }
   }
 
-  function filename_update() {
-    inspected_text_button.style.display =
-      filename_input.value === inspected_text_button.title ? 'none' : '';
-    use_document_title.style.display =
-      filename_input.value === use_document_title.title ? 'none' : '';
+  function filenameUpdate() {
+    useInspectedTextButton.style.display =
+      filenameInput.value === useInspectedTextButton.title ? 'none' : '';
+    useDocumentTitleButton.style.display =
+      filenameInput.value === useDocumentTitleButton.title ? 'none' : '';
   }
 
-  function url_update() {
-    url_input.classList.toggle('downloaded', history.includes(url_input.value));
-    ffmpeg_update();
+  function urlUpdate() {
+    urlInput.classList.toggle('downloaded', history.includes(urlInput.value));
+    ffmpegUpdate();
   }
 
-  function ffmpeg_update() {
-    const url_extension = extract_url_extension(url_input.value);
-    if (url_extension === 'm3u8') {
-      let filename = filename_input.value || 'video';
-      const filename_extension = extract_extension(filename);
+  function ffmpegUpdate() {
+    const urlExtension = extractUrlFilenameExtension(urlInput.value);
+    if (urlExtension === 'm3u8') {
+      let filename = filenameInput.value || 'video';
+      const filenameExtension = extractFilenameExtension(filename);
       if (
-        filename_extension === '' ||
-        filename_extension !== filename_extension.toLowerCase() ||
-        filename_extension.length > 4
+        filenameExtension === '' ||
+        filenameExtension !== filenameExtension.toLowerCase() ||
+        filenameExtension.length > 4
       ) {
         filename += '.mp4';
       }
       filename = filename.replaceAll("'", '').replace(/[\/\\]/g, '-');
-      ffmpeg_command_input.value = `ffmpeg -i ${quoteCharacter}${url_input.value}${quoteCharacter} -c copy ${quoteCharacter}${filename}${quoteCharacter}`;
-      ffmpeg_command_input.style.display = 'block';
+      ffmpegCommandInput.value = `ffmpeg -i ${quoteCharacter}${urlInput.value}${quoteCharacter} -c copy ${quoteCharacter}${filename}${quoteCharacter}`;
+      ffmpegCommandInput.style.display = 'block';
     } else {
-      ffmpeg_command_input.style.display = 'none';
+      ffmpegCommandInput.style.display = 'none';
     }
   }
 
-  url_input.addEventListener('input', url_update);
-  url_input.addEventListener('focus', url_update);
-  url_input.addEventListener('keyup', keyup);
-  filename_input.addEventListener('input', ffmpeg_update);
-  filename_input.addEventListener('input', filename_update);
-  filename_input.addEventListener('keyup', keyup);
-  download_button.addEventListener('click', download);
-  saveas_button.addEventListener('click', saveas);
+  urlInput.addEventListener('input', urlUpdate);
+  urlInput.addEventListener('focus', urlUpdate);
+  urlInput.addEventListener('keyup', keyup);
+  filenameInput.addEventListener('input', ffmpegUpdate);
+  filenameInput.addEventListener('input', filenameUpdate);
+  filenameInput.addEventListener('keyup', keyup);
+  downloadButton.addEventListener('click', download);
+  saveAsButton.addEventListener('click', saveas);
 
   // window.addEventListener('focus', () => {
-  if (url_input.value === '') {
-    url_input.focus();
+  if (urlInput.value === '') {
+    urlInput.focus();
     document.execCommand('paste');
-    const text = url_input.value;
+    const text = urlInput.value;
     if (history.includes(text)) {
-      // don't use the pasted url if we have it in the history
-      url_input.value = '';
+      // Don't use the pasted url if we have it in the history
+      urlInput.value = '';
     } else {
       if (/^https?:\/\//i.test(text)) {
-        setTimeout(() => filename_input.focus(), 10);
-        url_update();
+        setTimeout(() => filenameInput.focus(), 10);
+        urlUpdate();
       } else {
-        url_input.value = '';
+        urlInput.value = '';
       }
     }
-  } else if (filename_input.value === '') {
-    filename_input.focus();
+  } else if (filenameInput.value === '') {
+    filenameInput.focus();
   }
   // });
 
-  let network_entries = [];
-  let network_visible_entries = [];
-  network_minsize_checkbox.addEventListener('change', function () {
-    network_minsize_input.classList.toggle('enabled', this.checked);
-    filter_network_list();
+  let networkEntries = [];
+  let networkVisibleEntries = [];
+  networkMinsizeCheckbox.addEventListener('change', function () {
+    networkMinsizeInput.classList.toggle('enabled', this.checked);
+    filterNetworkList();
   });
-  network_hidedata_checkbox.addEventListener('change', filter_network_list);
+  networkHidedataCheckbox.addEventListener('change', filterNetworkList);
 
-  function minsize_change() {
-    if (!network_minsize_checkbox.checked) {
+  function networkMinsizeChange() {
+    if (!networkMinsizeCheckbox.checked) {
       if (this.value !== '') {
-        network_minsize_checkbox.checked = true;
-        network_minsize_input.classList.add('enabled');
-        filter_network_list();
+        networkMinsizeCheckbox.checked = true;
+        networkMinsizeInput.classList.add('enabled');
+        filterNetworkList();
       }
     } else {
       if (this.value === '') {
-        network_minsize_checkbox.checked = false;
-        network_minsize_input.classList.remove('enabled');
+        networkMinsizeCheckbox.checked = false;
+        networkMinsizeInput.classList.remove('enabled');
       }
-      filter_network_list();
+      filterNetworkList();
     }
   }
 
-  network_minsize_input.addEventListener('focus', minsize_change);
-  network_minsize_input.addEventListener('keyup', minsize_change);
-  network_minsize_input.addEventListener('search', minsize_change);
-  network_regex_input.addEventListener('focus', filter_network_list);
-  network_regex_input.addEventListener('keyup', filter_network_list);
-  network_regex_input.addEventListener('search', filter_network_list);
+  networkMinsizeInput.addEventListener('focus', networkMinsizeChange);
+  networkMinsizeInput.addEventListener('keyup', networkMinsizeChange);
+  networkMinsizeInput.addEventListener('search', networkMinsizeChange);
+  networkRegexpInput.addEventListener('focus', filterNetworkList);
+  networkRegexpInput.addEventListener('keyup', filterNetworkList);
+  networkRegexpInput.addEventListener('search', filterNetworkList);
 
-  for (const filter of document.querySelectorAll('[regex-filter]')) {
+  for (const filter of document.querySelectorAll('[data-regex-filter]')) {
     filter.addEventListener('click', function () {
-      network_regex_input.value = this.getAttribute('regex-filter');
-      filter_network_list();
+      networkRegexpInput.value = this.dataset.regexFilter;
+      filterNetworkList();
     });
     if (filter.title === '') {
-      filter.title = filter.getAttribute('regex-filter');
+      filter.title = filter.dataset.regexFilter;
     }
   }
 
-  function clear_network_list() {
-    network_visible_entries = [];
-    while (network_list.hasChildNodes()) {
-      network_list.removeChild(network_list.firstChild);
+  function clearNetworkList() {
+    networkVisibleEntries = [];
+    while (networkList.hasChildNodes()) {
+      networkList.removeChild(networkList.firstChild);
     }
   }
 
-  function add_network_entry(entry, new_entry) {
-    network_visible_entries.push(entry);
+  function addNetworkEntry(entry, newEntry) {
+    networkVisibleEntries.push(entry);
     let filename = '';
     if (!entry.request.url.startsWith('data:')) {
-      filename = extract_url_filename(entry.request.url);
+      filename = extractUrlFilename(entry.request.url);
     }
     const li = document.createElement('li');
     const span = document.createElement('span');
-    const url_link = document.createElement('a');
+    const urlLink = document.createElement('a');
     li.appendChild(span);
     if (history.includes(entry.request.url)) {
       li.classList.add('downloaded');
-    } else if (typeof new_entry === 'boolean' && new_entry) {
+    } else if (typeof newEntry === 'boolean' && newEntry) {
       li.classList.add('new');
     }
 
-    // instant download link
+    // Instant download link
     span.appendChild(document.createTextNode('['));
-    const instant_link = document.createElement('a');
-    instant_link.href = '#'; // needed for middle click
-    instant_link.title = `Download ${filename}`;
-    instant_link.textContent = 'download';
-    // highlight url when hovering instant download link
-    instant_link.addEventListener('mouseenter', () =>
-      url_link.classList.add('hover'),
+    const instantLink = document.createElement('a');
+    instantLink.href = '#'; // Needed for middle click
+    instantLink.title = `Download ${filename}`;
+    instantLink.textContent = 'download';
+    // Highlight url when hovering instant download link
+    instantLink.addEventListener('mouseenter', () =>
+      urlLink.classList.add('hover'),
     );
-    instant_link.addEventListener('mouseleave', () =>
-      url_link.classList.remove('hover'),
+    instantLink.addEventListener('mouseleave', () =>
+      urlLink.classList.remove('hover'),
     );
-    // instant_link.addEventListener('onmousedown', e => {
+    // instantLink.addEventListener('onmousedown', (e) => {
     //   if (e.button === 1) {
     //     e.preventDefault();
     //   }
     // });
-    instant_link.addEventListener('click', e => {
+    instantLink.addEventListener('click', (e) => {
       e.preventDefault();
-      // middle click uses saveAs
-      start_download({
+      // Middle click uses saveAs
+      startDownload({
         url: entry.request.url,
         saveAs: e.button === 1 || e.metaKey || e.ctrlKey,
       });
     });
-    span.appendChild(instant_link);
+    span.appendChild(instantLink);
     span.appendChild(document.createTextNode('] '));
 
-    // preview
+    // Preview
     if (entry.content || entry.request.url.startsWith('data:image/')) {
       span.appendChild(document.createTextNode('['));
       const a = document.createElement('a');
@@ -402,7 +399,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         img.src = entry.request.url;
       } else {
         let mime =
-          'image/' + (extract_url_extension(entry.request.url) || 'png');
+          'image/' + (extractUrlFilenameExtension(entry.request.url) || 'png');
         if (mime === 'image/svg') {
           mime += '+xml';
         }
@@ -428,39 +425,40 @@ document.addEventListener('DOMContentLoaded', async () => {
       span.appendChild(document.createTextNode('] '));
     }
 
-    // link to populate form
-    url_link.textContent = entry.request.url;
-    url_link.href = entry.request.url;
-    url_link.addEventListener('click', e => {
-      // allow middle click to open link in new window (or command or ctrl key)
+    // Link to populate form
+    urlLink.textContent = entry.request.url;
+    urlLink.href = entry.request.url;
+    urlLink.addEventListener('click', (e) => {
+      // Make middle click to open link in new window (or command or ctrl key)
       if (e.button === 0 && !(e.metaKey || e.ctrlKey)) {
         e.preventDefault();
-        url_input.value = entry.request.url;
-        url_update();
-        setTimeout(() => filename_input.focus(), 100);
+        urlInput.value = entry.request.url;
+        urlUpdate();
+        setTimeout(() => filenameInput.focus(), 100);
       }
     });
-    span.appendChild(url_link);
+    span.appendChild(urlLink);
     span.title = filename;
 
     const size = entry.response.content.size;
     if (size >= 0) {
-      span.appendChild(document.createTextNode(` (${fmt_filesize(size)})`));
-      instant_link.title += ` (${fmt_filesize(size)})`;
-      span.title += ` (${fmt_filesize(size)})`;
+      const filesize = formatFilesize(size);
+      span.appendChild(document.createTextNode(` (${filesize})`));
+      instantLink.title += ` (${filesize})`;
+      span.title += ` (${filesize})`;
     }
-    if (options.reverse_list) {
-      network_list.insertBefore(li, network_list.firstChild);
+    if (options.reverseList) {
+      networkList.insertBefore(li, networkList.firstChild);
     } else {
-      network_list.appendChild(li);
+      networkList.appendChild(li);
     }
   }
 
-  function valid_request(entry) {
-    // ignore data urls (0), redirects (3xx), grab resources: empty url, chrome-extension, about:, extensions:
+  function validRequest(entry) {
+    // Ignore data urls (0), redirects (3xx), grab resources: empty url, chrome-extension, about:, extensions:
     const status = entry.response.status;
     const url = entry.request.url;
-    const prefix = url.substr(0, url.indexOf(':'));
+    const prefix = url.substring(0, url.indexOf(':'));
     const skip = ['', 'javascript', 'chrome-extension', 'about', 'extensions'];
     if (
       status === 0 ||
@@ -469,19 +467,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     ) {
       return false;
     }
-    // don't record duplicate urls
+    // Don't record duplicate urls
     if (
-      network_entries.some(existing_entry => existing_entry.request.url === url)
+      networkEntries.some((existingEntry) => existingEntry.request.url === url)
     ) {
       return false;
     }
     return true;
   }
 
-  function filter_request(entry) {
-    if (network_minsize_checkbox.checked) {
-      let minsize = parseInt(network_minsize_input.value, 10); // it is fine to parse even with trailing characters, they will just be ignored
-      const suffix = network_minsize_input.value.slice(-1).toLowerCase();
+  function filterRequest(entry) {
+    if (networkMinsizeCheckbox.checked) {
+      let minsize = parseInt(networkMinsizeInput.value, 10); // It is fine to parse even with trailing characters, they will just be ignored
+      const suffix = networkMinsizeInput.value.slice(-1).toLowerCase();
 
       if (suffix === 'k') {
         minsize = minsize * 1024;
@@ -496,13 +494,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     }
     if (
-      network_hidedata_checkbox.checked &&
+      networkHidedataCheckbox.checked &&
       entry.request.url.startsWith('data:')
     ) {
       return false;
     }
-    if (network_regex_input.value !== '') {
-      const re = new RegExp(network_regex_input.value, 'i');
+    if (networkRegexpInput.value !== '') {
+      const re = new RegExp(networkRegexpInput.value, 'i');
       if (!re.test(entry.request.url)) {
         return false;
       }
@@ -510,31 +508,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     return true;
   }
 
-  function update_request_stats() {
-    const shown = network_list.childNodes.length;
-    const total = network_entries.length;
+  function updateRequestStats() {
+    const shown = networkList.childNodes.length;
+    const total = networkEntries.length;
     if (shown !== total) {
-      network_stats.textContent = `Showing ${shown} / ${total} urls.`;
+      networkStats.textContent = `Showing ${shown} / ${total} urls.`;
     } else if (total === 0) {
-      network_stats.textContent = 'No urls captured.';
+      networkStats.textContent = 'No urls captured.';
     } else {
-      network_stats.textContent = `Captured ${shown} urls.`;
+      networkStats.textContent = `Captured ${shown} urls.`;
     }
   }
 
-  function filter_network_list() {
-    clear_network_list();
-    const entries = network_entries.filter(filter_request);
-    entries.forEach(add_network_entry);
-    update_request_stats();
-    // autograb url if filtering only matches one entry
-    if (url_input.value === '' && entries.length === 1) {
-      url_input.value = entries[0].request.url;
-      url_update();
+  function filterNetworkList() {
+    clearNetworkList();
+    const entries = networkEntries.filter(filterRequest);
+    entries.forEach(addNetworkEntry);
+    updateRequestStats();
+    // Autograb url if filtering only matches one entry
+    if (urlInput.value === '' && entries.length === 1) {
+      urlInput.value = entries[0].request.url;
+      urlUpdate();
     }
   }
 
-  function populate_urls(urls, isException) {
+  function populateUrls(urls, isException) {
     for (const url of urls) {
       const entry = {
         request: {
@@ -545,29 +543,29 @@ document.addEventListener('DOMContentLoaded', async () => {
           content: { size: -1 },
         },
       };
-      if (valid_request(entry)) {
-        network_entries.push(entry);
+      if (validRequest(entry)) {
+        networkEntries.push(entry);
       }
     }
-    filter_network_list();
+    filterNetworkList();
   }
 
-  // action links
+  // Action links
   const actions = {
     'clear-history': function (e) {
       history = [];
       setTimeout(() => {
-        while (history_list.hasChildNodes()) {
-          history_list.removeChild(history_list.firstChild);
+        while (historyList.hasChildNodes()) {
+          historyList.removeChild(historyList.firstChild);
         }
         document.body.removeAttribute('history');
-        url_update();
+        urlUpdate();
       }, 100);
     },
     'clear-network': function (e) {
-      network_entries = [];
-      clear_network_list();
-      update_request_stats();
+      networkEntries = [];
+      clearNetworkList();
+      updateRequestStats();
     },
     reload: function (e) {
       chrome.devtools.inspectedWindow.reload({ ignoreCache: true });
@@ -581,7 +579,7 @@ for (const link of document.getElementsByTagName('a')) {\
 }\
 return urls;\
 })()",
-        populate_urls,
+        populateUrls,
       );
     },
     'grab-inspected-links': function (e) {
@@ -596,20 +594,20 @@ for (const link of $0.getElementsByTagName('a')) {\
 }\
 return urls;\
 })()",
-        populate_urls,
+        populateUrls,
       );
     },
     inspect: function (e) {
-      if (inspect_interval) {
-        clearInterval(inspect_interval);
-        inspect_interval = null;
-        inspect_button.textContent = 'Inspect';
+      if (inspectInterval) {
+        clearInterval(inspectInterval);
+        inspectInterval = null;
+        inspectButton.textContent = 'Inspect';
         chrome.devtools.inspectedWindow.eval(
           '(function(){ delete window.downloadPanelExtensionText; })()',
         );
         return;
       }
-      inspect_button.textContent = 'Stop';
+      inspectButton.textContent = 'Stop';
       chrome.devtools.inspectedWindow.eval(
         "(function(){\
 if (window.downloadPanelExtensionText !== undefined) {\
@@ -686,7 +684,7 @@ window.addEventListener('scroll', updateTarget, true);\
 window.addEventListener('click', handleClick, true);\
 })()",
       );
-      inspect_interval = setInterval(() => {
+      inspectInterval = setInterval(() => {
         chrome.devtools.inspectedWindow.eval(
           '(function(){ return window.downloadPanelExtensionText; })()',
           (text, err) => {
@@ -695,32 +693,32 @@ window.addEventListener('click', handleClick, true);\
               return;
             }
             if (text === undefined) {
-              clearInterval(inspect_interval);
-              inspect_interval = null;
-              inspect_button.textContent = 'Inspect';
+              clearInterval(inspectInterval);
+              inspectInterval = null;
+              inspectButton.textContent = 'Inspect';
               return;
             }
             text = (text || '')
               .replace(/[:*?"<>|\r\n]/g, '')
               .replace(/[\t \xa0]+/g, ' ')
               .trim();
-            if (text === filename_input.value) {
+            if (text === filenameInput.value) {
               return;
             }
-            filename_input.value = text;
-            ffmpeg_update();
+            filenameInput.value = text;
+            ffmpegUpdate();
           },
         );
       }, 100);
     },
     'adopt-text-for-filename': function (e) {
-      filename_input.value = this.title;
-      filename_update();
-      ffmpeg_update();
+      filenameInput.value = this.title;
+      filenameUpdate();
+      ffmpegUpdate();
     },
     'grab-resources': function (e) {
-      chrome.devtools.inspectedWindow.getResources(resources => {
-        // we're faking HAR entries here, we'll see if this holds up in the future
+      chrome.devtools.inspectedWindow.getResources((resources) => {
+        // We're faking HAR entries here, we'll see if this holds up in the future
         for (const resource of resources) {
           const entry = {
             request: {
@@ -731,26 +729,26 @@ window.addEventListener('click', handleClick, true);\
               content: { size: -1 },
             },
           };
-          if (valid_request(entry)) {
+          if (validRequest(entry)) {
             if (resource.type === 'image') {
               resource.getContent((content, encoding) => {
                 entry.content = { encoding: encoding, data: content };
-                network_entries.push(entry);
-                filter_network_list();
+                networkEntries.push(entry);
+                filterNetworkList();
               });
             } else {
-              network_entries.push(entry);
+              networkEntries.push(entry);
             }
           }
         }
-        filter_network_list();
+        filterNetworkList();
       });
     },
     'download-all': function (e) {
-      const filename = filename_input.value; // Save this value because the input field will be cleared after the first call
-      network_visible_entries.forEach(function (entry, index) {
+      const filename = filenameInput.value; // Save this value because the input field will be cleared after the first call
+      networkVisibleEntries.forEach(function (entry, index) {
         setTimeout(() => {
-          start_download({
+          startDownload({
             url: entry.request.url,
             filename: filename,
           });
@@ -771,45 +769,45 @@ window.addEventListener('click', handleClick, true);\
     },
   };
 
-  for (const link of document.querySelectorAll('[action]')) {
+  for (const link of document.querySelectorAll('[data-action]')) {
     link.addEventListener('click', function (e) {
       e.preventDefault();
-      actions[this.getAttribute('action')].call(this, e);
+      actions[this.dataset.action].call(this, e);
     });
   }
 
-  // Only try to use chrome.devtools.* APIs if we're a devtools page (opening the chrome-extension url in its own tab will cause Aw Snap)
+  // Only try to use chrome.devtools.* APIs if we're a devtools page (opening the chrome-extension:// url in its own tab will cause Aw Snap)
   if (window.top !== window) {
     document.body.setAttribute('devtools', '');
 
-    chrome.devtools.network.getHAR(har_log => {
-      network_entries = network_entries.concat(
-        har_log.entries.filter(valid_request),
+    chrome.devtools.network.getHAR((harLog) => {
+      networkEntries = networkEntries.concat(
+        harLog.entries.filter(validRequest),
       );
-      filter_network_list();
+      filterNetworkList();
     });
 
-    chrome.devtools.network.onRequestFinished.addListener(har_entry => {
-      if (valid_request(har_entry)) {
-        network_entries.push(har_entry);
-        if (filter_request(har_entry)) {
-          if (network_autodownload_checkbox.checked) {
-            start_download({ url: har_entry.request.url });
+    chrome.devtools.network.onRequestFinished.addListener((entry) => {
+      if (validRequest(entry)) {
+        networkEntries.push(entry);
+        if (filterRequest(entry)) {
+          if (networkAutodownloadCheckbox.checked) {
+            startDownload({ url: entry.request.url });
           }
-          add_network_entry(har_entry, true);
+          addNetworkEntry(entry, true);
         }
-        update_request_stats();
+        updateRequestStats();
       }
     });
 
-    chrome.devtools.network.onNavigated.addListener(url => {
+    chrome.devtools.network.onNavigated.addListener((url) => {
       // console.log(url);
-      if (network_autoclear_checkbox.checked) {
+      if (networkAutoclearCheckbox.checked) {
         actions['clear-network']();
       }
     });
 
-    function check_inspected_element() {
+    function checkInspectedElement() {
       chrome.devtools.inspectedWindow.eval(
         "(function(){ if ($0 !== undefined) { return $0.getElementsByTagName('a').length; } })()",
         (count, err) => {
@@ -818,7 +816,7 @@ window.addEventListener('click', handleClick, true);\
             return;
           }
           const link = document.querySelector(
-            '[action="grab-inspected-links"]',
+            '[data-action="grab-inspected-links"]',
           );
           while (link.childNodes.length > 1) {
             link.removeChild(link.lastChild);
@@ -845,17 +843,17 @@ window.addEventListener('click', handleClick, true);\
             .replace(/[\t ]+/g, ' ')
             .trim();
           if (text !== '') {
-            inspected_text_button.title = text;
-            inspected_text_button.textContent = text;
-            inspected_text_button.style.display = '';
+            useInspectedTextButton.title = text;
+            useInspectedTextButton.textContent = text;
+            useInspectedTextButton.style.display = '';
           } else {
-            inspected_text_button.textContent = '';
+            useInspectedTextButton.textContent = '';
           }
         },
       );
     }
 
-    function update_document_title() {
+    function updateDocumentTitle() {
       chrome.devtools.inspectedWindow.eval(
         '(function(){ return [document.location.href, document.title]; })()',
         ([url, title], err) => {
@@ -881,13 +879,13 @@ window.addEventListener('click', handleClick, true);\
             .replace(/[:*?"<>|\r\n]/g, '')
             .replace(/[\t ]+/g, ' ')
             .trim();
-          if (title === use_document_title.title) {
+          if (title === useDocumentTitleButton.title) {
             return;
           }
-          use_document_title.title = title;
-          use_document_title.textContent = title;
-          use_document_title.style.display =
-            filename_input.value === use_document_title.title ? 'none' : '';
+          useDocumentTitleButton.title = title;
+          useDocumentTitleButton.textContent = title;
+          useDocumentTitleButton.style.display =
+            filenameInput.value === title ? 'none' : '';
         },
       );
     }
@@ -896,12 +894,12 @@ window.addEventListener('click', handleClick, true);\
       // Can't react to theme updates yet, the value doesn't change when the theme is changed
       document.body.classList.add(`theme-${chrome.devtools.panels.themeName}`);
       chrome.devtools.panels.elements.onSelectionChanged.addListener(
-        check_inspected_element,
+        checkInspectedElement,
       );
-      check_inspected_element();
-      update_document_title();
-      chrome.devtools.network.onNavigated.addListener(update_document_title);
-      setInterval(update_document_title, 1000); // detect title updates
+      checkInspectedElement();
+      updateDocumentTitle();
+      chrome.devtools.network.onNavigated.addListener(updateDocumentTitle);
+      setInterval(updateDocumentTitle, 1000); // Detect title updates
     }
   }
 });
