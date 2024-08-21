@@ -404,7 +404,10 @@ document.addEventListener('DOMContentLoaded', async () => {
           mime += '+xml';
         }
         const arr = [];
-        const binary = atob(entry.content.data);
+        const binary =
+          entry.content.encoding === 'base64'
+            ? atob(entry.content.data)
+            : entry.content.data;
         for (let i = 0; i < binary.length; i++) {
           arr.push(binary.charCodeAt(i));
         }
@@ -575,7 +578,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         "(function(){\
 const urls = [];\
 for (const link of document.getElementsByTagName('a')) {\
-  urls.push(link.href);\
+  if (typeof link.href === 'string') {\
+    urls.push(link.href);\
+  }\
 }\
 return urls;\
 })()",
@@ -585,8 +590,11 @@ return urls;\
     'grab-inspected-links': function (e) {
       chrome.devtools.inspectedWindow.eval(
         "(function(){\
+if (!$0) {\
+  return [];\
+}\
 const urls = [];\
-if ($0.tagName === 'A') {\
+if ($0.tagName === 'A' && typeof $0.href === 'string') {\
   urls.push($0.href);\
 }\
 for (const link of $0.getElementsByTagName('a')) {\
