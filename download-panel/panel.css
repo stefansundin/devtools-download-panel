@@ -88,7 +88,8 @@ a[disabled] {
 img.preview {
   position: absolute;
   left: 200px;
-  background-image: url(img/alpha.png);
+  max-width: 50%;
+  background-image: url('img/alpha.png');
 }
 .clearfix {
   clear: both;
