@@ -61,6 +61,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   const useInspectedTextButton = document.getElementById('use-inspected-text');
   const downloadButton = document.getElementById('download');
   const saveAsButton = document.getElementById('saveas');
+  const copyFfmpegCommandButton = document.getElementById(
+    'copy-ffmpeg-command',
+  );
   const historyList = document.getElementById('history');
   const networkRegexpInput = document.getElementById('network-regexp');
   const networkMinsizeCheckbox = document.getElementById('network-minsize');
@@ -259,9 +262,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
       filename = filename.replaceAll("'", '').replace(/[\/\\]/g, '-');
       ffmpegCommandInput.value = `ffmpeg -i ${quoteCharacter}${urlInput.value}${quoteCharacter} -c copy ${quoteCharacter}${filename}${quoteCharacter}`;
-      ffmpegCommandInput.style.display = 'block';
+      ffmpegCommandInput.style.display = 'inline-block';
+      copyFfmpegCommandButton.style.display = 'inline-block';
     } else {
       ffmpegCommandInput.style.display = 'none';
+      copyFfmpegCommandButton.style.display = 'none';
     }
   }
 
@@ -273,6 +278,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   filenameInput.addEventListener('keyup', keyup);
   downloadButton.addEventListener('click', download);
   saveAsButton.addEventListener('click', saveas);
+  copyFfmpegCommandButton.addEventListener('click', async () => {
+    ffmpegCommandInput.select();
+    document.execCommand('copy');
+  });
 
   // window.addEventListener('focus', () => {
   if (urlInput.value === '') {
