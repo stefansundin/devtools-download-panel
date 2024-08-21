@@ -192,9 +192,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     a.textContent = opts.url;
     a.href = opts.url;
     a.title = opts.filename ? opts.filename : extractUrlFilename(opts.url);
+    // Middle click, or command/ctrl click, opens the link in a new tab
     a.addEventListener('click', (e) => {
-      // Make middle click to open link in new window
-      if (e.button === 0 && !(e.metaKey || e.ctrlKey)) {
+      if (!e.metaKey && !e.ctrlKey) {
         e.preventDefault();
         urlInput.value = opts.url;
         urlUpdate();
@@ -360,9 +360,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Instant download link
+    function instantLinkClick(e) {
+      e.preventDefault();
+      startDownload({
+        url: entry.request.url,
+        saveAs: e.button === 1 || e.metaKey || e.ctrlKey,
+      });
+    }
     span.appendChild(document.createTextNode('['));
     const instantLink = document.createElement('a');
-    instantLink.href = '#'; // Needed for middle click
     instantLink.title = `Download ${filename}`;
     instantLink.textContent = 'download';
     // Highlight url when hovering instant download link
@@ -372,19 +378,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     instantLink.addEventListener('mouseleave', () =>
       urlLink.classList.remove('hover'),
     );
-    // instantLink.addEventListener('onmousedown', (e) => {
-    //   if (e.button === 1) {
-    //     e.preventDefault();
-    //   }
-    // });
-    instantLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      // Middle click uses saveAs
-      startDownload({
-        url: entry.request.url,
-        saveAs: e.button === 1 || e.metaKey || e.ctrlKey,
-      });
-    });
+    instantLink.addEventListener('click', instantLinkClick);
+    instantLink.addEventListener('auxclick', instantLinkClick);
     span.appendChild(instantLink);
     span.appendChild(document.createTextNode('] '));
 
@@ -431,9 +426,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Link to populate form
     urlLink.textContent = entry.request.url;
     urlLink.href = entry.request.url;
+    // Middle click, or command/ctrl click, opens the link in a new tab
     urlLink.addEventListener('click', (e) => {
-      // Make middle click to open link in new window (or command or ctrl key)
-      if (e.button === 0 && !(e.metaKey || e.ctrlKey)) {
+      if (!e.metaKey && !e.ctrlKey) {
         e.preventDefault();
         urlInput.value = entry.request.url;
         urlUpdate();
