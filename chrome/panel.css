@@ -105,6 +105,9 @@ img.preview {
 .d-none {
   display: none;
 }
+.text-danger {
+  color: #dc3545 !important;
+}
 #scroll-to-top {
   position: fixed;
   bottom: 0;

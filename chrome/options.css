@@ -1,6 +1,6 @@
 body {
-  min-width: 400px;
-  min-height: 200px;
+  font-family: system-ui, sans-serif;
+  font-size: 75%;
 }
 a {
   text-decoration: none;

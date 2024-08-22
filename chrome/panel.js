@@ -1,5 +1,7 @@
 // We have to use a lot of setTimeout in click handlers unfortunately, otherwise it will cause another click if the content scrolls up due to what happens in the handler.
 
+const isFirefox = navigator.userAgent.includes('Firefox/');
+
 function formatFilesize(bytes, digits = 1) {
   const units = [
     'bytes',
@@ -52,6 +54,11 @@ function extractUrlFilenameExtension(url) {
   return extractFilenameExtension(extractUrlFilename(url));
 }
 
+function displayError(text) {
+  const errorElement = document.getElementById('error');
+  errorElement.textContent = text;
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   const urlInput = document.getElementById('url');
   const filenameInput = document.getElementById('filename');
@@ -81,12 +88,32 @@ document.addEventListener('DOMContentLoaded', async () => {
   versionInfo.textContent = `v${version}`;
 
   const platform = await chrome.runtime.sendMessage({ action: 'get-platform' });
-  for (const link of document.querySelectorAll(
-    'a[href="chrome://downloads"]',
-  )) {
-    link.title = platform.os === 'mac' ? '⌘ + Shift + J' : 'Ctrl + J';
-  }
   const quoteCharacter = platform.os === 'win' ? '"' : "'";
+  const openDownloadsTabLink = document.querySelector(
+    'a[href="chrome://downloads"]',
+  );
+  if (isFirefox) {
+    // Attempting to open about:downloads in Firefox results in an error: Error: Illegal URL: about:downloads
+    // openDownloadsTabLink.href = 'about:downloads';
+    // openDownloadsTabLink.title =
+    //   platform.os === 'linux'
+    //     ? 'Ctrl + Shift + Y'
+    //     : platform.os === 'mac'
+    //     ? '⌘ + J'
+    //     : 'Ctrl + J';
+    openDownloadsTabLink.nextSibling.remove();
+    openDownloadsTabLink.remove();
+  } else {
+    openDownloadsTabLink.title =
+      platform.os === 'mac' ? '⌘ + Shift + J' : 'Ctrl + J';
+  }
+  const openDownloadsSettingsLink = document.querySelector(
+    'a[href="chrome://settings/downloads"]',
+  );
+  if (isFirefox) {
+    openDownloadsSettingsLink.nextSibling.remove();
+    openDownloadsSettingsLink.remove();
+  }
 
   if (!chrome.devtools.inspectedWindow.getResources) {
     const grabResourcesLink = document.querySelector(
@@ -546,7 +573,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  function populateUrls(urls, isException) {
+  function populateUrls(urls, err) {
+    if (err) {
+      console.error(err);
+      displayError(err?.details?.join(', ') ?? err?.description ?? 'Error');
+      return;
+    }
     for (const url of urls) {
       const entry = {
         request: {
@@ -708,6 +740,9 @@ window.addEventListener('click', handleClick, true);\
           (text, err) => {
             if (err) {
               console.error(err);
+              displayError(
+                err?.details?.join(', ') ?? err?.description ?? 'Error',
+              );
               return;
             }
             if (text === undefined) {
@@ -825,6 +860,7 @@ window.addEventListener('click', handleClick, true);\
       (count, err) => {
         if (err) {
           console.error(err);
+          displayError(err?.details?.join(', ') ?? err?.description ?? 'Error');
           return;
         }
         const link = document.querySelector(
@@ -847,6 +883,7 @@ window.addEventListener('click', handleClick, true);\
       (text, err) => {
         if (err) {
           console.error(err);
+          displayError(err?.details?.join(', ') ?? err?.description ?? 'Error');
           return;
         }
         // text is undefined if there is no element selected, this happens when the user navigates to another page
@@ -868,11 +905,13 @@ window.addEventListener('click', handleClick, true);\
   function updateDocumentTitle() {
     chrome.devtools.inspectedWindow.eval(
       '(function(){ return [document.location.href, document.title]; })()',
-      ([url, title], err) => {
+      (data, err) => {
         if (err) {
           console.error(err);
+          displayError(err?.details?.join(', ') ?? err?.description ?? 'Error');
           return;
         }
+        const [url, title] = data;
         const uri = new URL(url);
         title = (title || '').trim();
         if (title) {
