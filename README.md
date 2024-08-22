@@ -1,6 +1,6 @@
-# Chrome Download Panel
+# DevTools Download Panel
 
-Adds a download panel to your devtools!
+Adds a download panel to your DevTools!
 
 Chrome Web Store: https://chromewebstore.google.com/detail/download-panel/dfkcgjijchipieeogdonnjbhlhjphbfn
 
@@ -9,7 +9,7 @@ Icon from: https://iconarchive.com/show/100-flat-icons-by-graphicloads/download-
 
 # Screenshot
 
-![Screenshot of Download Panel in the Chrome Devtools](screenshot.png)
+![Screenshot of Download Panel in the Chrome DevTools](screenshot.png)
 
 
 # Tips
