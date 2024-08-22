@@ -88,6 +88,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   const quoteCharacter = platform.os === 'win' ? '"' : "'";
 
+  if (!chrome.devtools.inspectedWindow.getResources) {
+    const grabResourcesLink = document.querySelector(
+      '[data-action="grab-resources"]',
+    );
+    grabResourcesLink.previousSibling.remove();
+    grabResourcesLink.remove();
+  }
+
   let history = [];
   let inspectInterval = null;
 
@@ -97,15 +105,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const scrollToTopLink = document.getElementById('scroll-to-top');
   scrollToTopLink.addEventListener('click', () => window.scrollTo(0, 0));
   window.addEventListener('scroll', () => {
-    if (window.scrollY > 0) {
-      if (scrollToTopLink.style.display === 'none') {
-        scrollToTopLink.style.display = 'block';
-      }
-    } else {
-      if (scrollToTopLink.style.display === 'block') {
-        scrollToTopLink.style.display = 'none';
-      }
-    }
+    scrollToTopLink.classList.toggle('d-none', window.scrollY === 0);
   });
 
   // Prevent Esc key from bringing up the console in input fields
@@ -188,7 +188,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Add to history
-    document.body.setAttribute('history', '');
     history.push(opts.url);
     const li = document.createElement('li');
     const a = document.createElement('a');
@@ -373,7 +372,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       e.preventDefault();
       startDownload({
         url: entry.request.url,
-        saveAs: e.button === 1 || e.metaKey || e.ctrlKey,
+        saveAs: e.button !== 0 || e.metaKey || e.ctrlKey,
       });
     }
     span.appendChild(document.createTextNode('['));
@@ -462,19 +461,27 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function validRequest(entry) {
-    // Ignore data urls (0), redirects (3xx), grab resources: empty url, chrome-extension, about:, extensions:
+    // Ignore data URLs (0), redirects (3xx), grab resources: empty URLs, chrome-extension://, about:, extensions:, ws://, wss://
     const status = entry.response.status;
     const url = entry.request.url;
-    const prefix = url.substring(0, url.indexOf(':'));
-    const skip = ['', 'javascript', 'chrome-extension', 'about', 'extensions'];
+    const protocol = url.substring(0, url.indexOf(':'));
+    const skipProtocols = [
+      '',
+      'javascript',
+      'chrome-extension',
+      'about',
+      'extensions',
+      'ws',
+      'wss',
+    ];
     if (
       status === 0 ||
       (status >= 300 && status <= 400) ||
-      skip.includes(prefix)
+      skipProtocols.includes(protocol)
     ) {
       return false;
     }
-    // Don't record duplicate urls
+    // Don't record duplicate URLs
     if (
       networkEntries.some((existingEntry) => existingEntry.request.url === url)
     ) {
@@ -519,11 +526,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const shown = networkList.childNodes.length;
     const total = networkEntries.length;
     if (shown !== total) {
-      networkStats.textContent = `Showing ${shown} / ${total} urls.`;
+      networkStats.textContent = `Showing ${shown} / ${total} URLs.`;
     } else if (total === 0) {
-      networkStats.textContent = 'No urls captured.';
+      networkStats.textContent = 'No URLs captured.';
     } else {
-      networkStats.textContent = `Captured ${shown} urls.`;
+      networkStats.textContent = `Captured ${shown} URLs.`;
     }
   }
 
@@ -565,7 +572,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         while (historyList.hasChildNodes()) {
           historyList.removeChild(historyList.firstChild);
         }
-        document.body.removeAttribute('history');
         urlUpdate();
       }, 100);
     },
@@ -788,130 +794,127 @@ window.addEventListener('click', handleClick, true);\
     });
   }
 
-  // Only try to use chrome.devtools.* APIs if we're a devtools page (opening the chrome-extension:// url in its own tab will cause Aw Snap)
-  if (window.top !== window) {
-    document.body.setAttribute('devtools', '');
+  chrome.devtools.network.getHAR((harLog) => {
+    networkEntries = networkEntries.concat(harLog.entries.filter(validRequest));
+    filterNetworkList();
+  });
 
-    chrome.devtools.network.getHAR((harLog) => {
-      networkEntries = networkEntries.concat(
-        harLog.entries.filter(validRequest),
-      );
-      filterNetworkList();
-    });
-
-    chrome.devtools.network.onRequestFinished.addListener((entry) => {
-      if (validRequest(entry)) {
-        networkEntries.push(entry);
-        if (filterRequest(entry)) {
-          if (networkAutodownloadCheckbox.checked) {
-            startDownload({ url: entry.request.url });
-          }
-          addNetworkEntry(entry, true);
+  chrome.devtools.network.onRequestFinished.addListener((entry) => {
+    if (validRequest(entry)) {
+      networkEntries.push(entry);
+      if (filterRequest(entry)) {
+        if (networkAutodownloadCheckbox.checked) {
+          startDownload({ url: entry.request.url });
         }
-        updateRequestStats();
+        addNetworkEntry(entry, true);
       }
-    });
-
-    chrome.devtools.network.onNavigated.addListener((url) => {
-      // console.log(url);
-      if (networkAutoclearCheckbox.checked) {
-        actions['clear-network']();
-      }
-    });
-
-    function checkInspectedElement() {
-      chrome.devtools.inspectedWindow.eval(
-        "(function(){ if ($0 !== undefined) { return $0.getElementsByTagName('a').length; } })()",
-        (count, err) => {
-          if (err) {
-            console.error(err);
-            return;
-          }
-          const link = document.querySelector(
-            '[data-action="grab-inspected-links"]',
-          );
-          while (link.childNodes.length > 1) {
-            link.removeChild(link.lastChild);
-          }
-          // count is undefined if there is no element selected, this happens when the user navigates to another page
-          if (count === undefined) {
-            link.setAttribute('disabled', true);
-          } else {
-            link.removeAttribute('disabled');
-            link.appendChild(document.createTextNode(` (${count} links)`));
-          }
-        },
-      );
-      chrome.devtools.inspectedWindow.eval(
-        '(function(){ if ($0 !== undefined && $0 !== document.body) { return $0.textContent; } })()',
-        (text, err) => {
-          if (err) {
-            console.error(err);
-            return;
-          }
-          // text is undefined if there is no element selected, this happens when the user navigates to another page
-          text = (text || '')
-            .replace(/[:*?"<>|\r\n]/g, '')
-            .replace(/[\t ]+/g, ' ')
-            .trim();
-          if (text !== '') {
-            useInspectedTextButton.title = text;
-            useInspectedTextButton.textContent = text;
-            useInspectedTextButton.style.display = '';
-          } else {
-            useInspectedTextButton.textContent = '';
-          }
-        },
-      );
+      updateRequestStats();
     }
+  });
 
-    function updateDocumentTitle() {
-      chrome.devtools.inspectedWindow.eval(
-        '(function(){ return [document.location.href, document.title]; })()',
-        ([url, title], err) => {
-          if (err) {
-            console.error(err);
-            return;
-          }
-          const uri = new URL(url);
-          title = (title || '').trim();
-          if (title) {
-            const lastPart = title.split(' ').at(-1).toLowerCase();
-            if (
-              title.length > lastPart.length &&
-              (uri.hostname.endsWith(lastPart) ||
-                uri.hostname.split('.').includes(lastPart))
-            ) {
-              title = title
-                .substring(0, title.length - lastPart.length)
-                .replace(/[\-|\t ]+$/, '');
-            }
-          }
-          title = title
-            .replace(/[:*?"<>|\r\n]/g, '')
-            .replace(/[\t ]+/g, ' ')
-            .trim();
-          if (title === useDocumentTitleButton.title) {
-            return;
-          }
-          useDocumentTitleButton.title = title;
-          useDocumentTitleButton.textContent = title;
-          useDocumentTitleButton.style.display =
-            filenameInput.value === title ? 'none' : '';
-        },
-      );
+  chrome.devtools.network.onNavigated.addListener((url) => {
+    // console.log(url);
+    if (networkAutoclearCheckbox.checked) {
+      actions['clear-network']();
     }
+  });
 
-    if (chrome.devtools.panels) {
-      // Can't react to theme updates yet, the value doesn't change when the theme is changed
-      document.body.classList.add(`theme-${chrome.devtools.panels.themeName}`);
-      chrome.devtools.panels.elements.onSelectionChanged.addListener(
-        checkInspectedElement,
-      );
-      checkInspectedElement();
-      updateDocumentTitle();
-      chrome.devtools.network.onNavigated.addListener(updateDocumentTitle);
-      setInterval(updateDocumentTitle, 1000); // Detect title updates
-    }
+  function checkInspectedElement() {
+    chrome.devtools.inspectedWindow.eval(
+      "(function(){ if ($0 !== undefined) { return $0.getElementsByTagName('a').length; } })()",
+      (count, err) => {
+        if (err) {
+          console.error(err);
+          return;
+        }
+        const link = document.querySelector(
+          '[data-action="grab-inspected-links"]',
+        );
+        while (link.childNodes.length > 1) {
+          link.removeChild(link.lastChild);
+        }
+        // count is undefined if there is no element selected, this happens when the user navigates to another page
+        if (count === undefined) {
+          link.setAttribute('disabled', true);
+        } else {
+          link.removeAttribute('disabled');
+          link.appendChild(document.createTextNode(` (${count} links)`));
+        }
+      },
+    );
+    chrome.devtools.inspectedWindow.eval(
+      '(function(){ if ($0 !== undefined && $0 !== document.body) { return $0.textContent; } })()',
+      (text, err) => {
+        if (err) {
+          console.error(err);
+          return;
+        }
+        // text is undefined if there is no element selected, this happens when the user navigates to another page
+        text = (text || '')
+          .replace(/[:*?"<>|\r\n]/g, '')
+          .replace(/[\t ]+/g, ' ')
+          .trim();
+        if (text !== '') {
+          useInspectedTextButton.title = text;
+          useInspectedTextButton.textContent = text;
+          useInspectedTextButton.style.display = '';
+        } else {
+          useInspectedTextButton.textContent = '';
+        }
+      },
+    );
   }
+
+  function updateDocumentTitle() {
+    chrome.devtools.inspectedWindow.eval(
+      '(function(){ return [document.location.href, document.title]; })()',
+      ([url, title], err) => {
+        if (err) {
+          console.error(err);
+          return;
+        }
+        const uri = new URL(url);
+        title = (title || '').trim();
+        if (title) {
+          const lastPart = title.split(' ').at(-1).toLowerCase();
+          if (
+            title.length > lastPart.length &&
+            (uri.hostname.endsWith(lastPart) ||
+              uri.hostname.split('.').includes(lastPart))
+          ) {
+            title = title
+              .substring(0, title.length - lastPart.length)
+              .replace(/[\-|\t ]+$/, '');
+          }
+        }
+        title = title
+          .replace(/[:*?"<>|\r\n]/g, '')
+          .replace(/[\t ]+/g, ' ')
+          .trim();
+        if (title === useDocumentTitleButton.title) {
+          return;
+        }
+        useDocumentTitleButton.title = title;
+        useDocumentTitleButton.textContent = title;
+        useDocumentTitleButton.style.display =
+          filenameInput.value === title ? 'none' : '';
+      },
+    );
+  }
+
+  document.body.classList.add(`theme-${chrome.devtools.panels.themeName}`);
+  if (chrome.devtools.panels.onThemeChanged) {
+    // Firefox only
+    chrome.devtools.panels.onThemeChanged.addListener((themeName) => {
+      document.body.classList.remove('theme-dark', 'theme-light');
+      document.body.classList.add(`theme-${themeName}`);
+    });
+  }
+  chrome.devtools.panels.elements.onSelectionChanged.addListener(
+    checkInspectedElement,
+  );
+  checkInspectedElement();
+  updateDocumentTitle();
+  chrome.devtools.network.onNavigated.addListener(updateDocumentTitle);
+  setInterval(updateDocumentTitle, 1000); // Detect title updates
 });

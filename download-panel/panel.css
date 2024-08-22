@@ -1,5 +1,7 @@
 body {
   padding-bottom: 30px;
+  font-family: system-ui, sans-serif;
+  font-size: 75%;
 }
 input[type='search'] {
   width: 100%;
@@ -115,12 +117,11 @@ img.preview {
   user-select: none;
 }
 
-.network, .history {
+.history {
   display: none;
 }
-body[devtools] .network,
-body[history] .history {
-  display: block;
+.history:has(li) {
+  display: block !important;
 }
 
 #network-minsize-value {
